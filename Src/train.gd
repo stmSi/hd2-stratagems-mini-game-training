@@ -59,8 +59,8 @@ func _input(event: InputEvent) -> void:
 		return
 
 	if key_event.keycode == KEY_ESCAPE:
-		_on_back_pressed()
 		get_viewport().set_input_as_handled()
+		_on_back_pressed()
 		return
 
 	if input_locked or current_sequence.is_empty():
