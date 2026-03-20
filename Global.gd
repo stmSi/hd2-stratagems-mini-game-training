@@ -1,0 +1,669 @@
+extends Node
+
+enum ARROW {DOWN, LEFT, UP, RIGHT}
+
+const STRATAGEM_CATEGORY_ORDER = ["orbital", "eagle", "support", "defensive", "mission"]
+const STRATAGEM_CATEGORY_LABELS = {
+	"orbital": "Orbital",
+	"eagle": "Eagle",
+	"support": "Support",
+	"defensive": "Defensive",
+	"mission": "Mission",
+}
+const STRATAGEM_CATEGORY_COLORS = {
+	"orbital": Color("ff6f61"),
+	"eagle": Color("ff8f3d"),
+	"support": Color("7cb7ff"),
+	"defensive": Color("7ecb6b"),
+	"mission": Color("f0cf5a"),
+}
+const STRATAGEM_CATEGORY_OVERRIDES = {
+	"ANTI_PERSONNEL_MINEFIELD": "defensive",
+	"ANTI_TANK_EMPLACEMENT": "defensive",
+	"ANTI_TANK_MINES": "defensive",
+	"AUTOCANNON_SENTRY": "defensive",
+	"BASTION_MK_XVI": "support",
+	"EMS_MORTAR_SENTRY": "defensive",
+	"FLAME_SENTRY": "defensive",
+	"GAS_MINES": "defensive",
+	"GAS_MORTAR_SENTRY": "defensive",
+	"GATLING_SENTRY": "defensive",
+	"GRENADIER_BATTLEMENT": "defensive",
+	"HMG_EMPLACEMENT": "defensive",
+	"INCENDIARY_MINES": "defensive",
+	"LASER_SENTRY": "defensive",
+	"MACHINE_GUN_SENTRY": "defensive",
+	"MORTAR_SENTRY": "defensive",
+	"ORBITAL_ILLUMINATION_FLARE": "mission",
+	"ROCKET_SENTRY": "defensive",
+	"SHIELD_GENERATOR_RELAY": "defensive",
+	"TESLA_TOWER": "defensive",
+	"CALL_IN_SUPER_DESTROYER": "mission",
+	"CARGO_CONTAINER": "mission",
+	"DARK_FLUID_VESSEL": "mission",
+	"EAGLE_REARM": "mission",
+	"HELLBOMB": "mission",
+	"ONE_TRUE_FLAG": "support",
+	"PORTABLE_HELLBOMB": "support",
+	"PROSPECTING_DRILL": "mission",
+	"REINFORCE": "mission",
+	"RESUPPLY": "mission",
+	"SEAF_ARTILLERY": "mission",
+	"SEISMIC_PROBE": "mission",
+	"SOLO_SILO": "support",
+	"SOS_BEACON": "mission",
+	"START_UPLOAD": "mission",
+	"SUPER_EARTH_FLAG": "mission",
+}
+
+const AIRBURST_ROCKET_LAUNCHER_STRATAGEM_ICON = preload("uid://dscxckl43wyd5")
+const ANTI_MATERIEL_RIFLE_STRATAGEM_ICON = preload("uid://3lygcnofir1j")
+const ANTI_PERSONNEL_MINEFIELD_STRATAGEM_ICON = preload("uid://df5tmvekjyarr")
+const ANTI_TANK_EMPLACEMENT_STRATAGEM_ICON = preload("uid://difqu18cy5yd")
+const ANTI_TANK_MINES_STRATAGEM_ICON = preload("uid://duuytr52mar62")
+const ARC_THROWER_STRATAGEM_ICON = preload("uid://cf5w5ojpdrk31")
+const AUTOCANNON_SENTRY_STRATAGEM_ICON = preload("uid://dg1pmwfpwxg8d")
+const AUTOCANNON_STRATAGEM_ICON = preload("uid://qvkhstjh5env")
+const BALLISTIC_SHIELD_BACKPACK_STRATAGEM_ICON = preload("uid://bj6lvk3d7wty5")
+const BASTION_MK_XVI_STRATAGEM_ICON = preload("uid://b51hhl2hic75g")
+const BELT_FED_GRENADE_LAUNCHER_STRATAGEM_ICON = preload("uid://cnf0ea8ddv7al")
+const BREACHING_HAMMER_STRATAGEM_ICON = preload("uid://c5g63ke74eocn")
+const C_4_PACK_STRATAGEM_ICON = preload("uid://4lktsbtfl605")
+const CALL_IN_SUPER_DESTROYER_STRATAGEM_ICON = preload("uid://dosb6u0yti4ki")
+const CARGO_CONTAINER_STRATAGEM_ICON = preload("uid://htjle5c7cmp8")
+const COMMANDO_STRATAGEM_ICON = preload("uid://lirw4mei1oux")
+const CREMATOR_STRATAGEM_ICON = preload("uid://d3ouwlv0h6w5w")
+const DARK_FLUID_VESSEL_STRATAGEM_ICON = preload("uid://clr4mvgd70lj")
+const DE_ESCALATOR_STRATAGEM_ICON = preload("uid://bed4eygrm3qyd")
+const DEFOLIATION_TOOL_STRATAGEM_ICON = preload("uid://sgfh8uyrc65e")
+const DIRECTIONAL_SHIELD_STRATAGEM_ICON = preload("uid://im0m4eexv52n")
+const DOG_BREATH_STRATAGEM_ICON = preload("uid://chaedbd1ktg0e")
+const EAGLE_110_MM_ROCKET_PODS_STRATAGEM_ICON = preload("uid://vvv5i8xgvjkg")
+const EAGLE_500_KG_BOMB_STRATAGEM_ICON = preload("uid://rkg8rusipbf3")
+const EAGLE_AIRSTRIKE_STRATAGEM_ICON = preload("uid://p6o4ur1w6kt2")
+const EAGLE_CLUSTER_BOMB_STRATAGEM_ICON = preload("uid://r257rli2nfua")
+const EAGLE_NAPALM_AIRSTRIKE_STRATAGEM_ICON = preload("uid://cgitlfcxgmgnc")
+const EAGLE_REARM_STRATAGEM_ICON = preload("uid://t3skgn7gdepm")
+const EAGLE_SMOKE_STRIKE_STRATAGEM_ICON = preload("uid://eegltx2c3prf")
+const EAGLE_STRAFING_RUN_STRATAGEM_ICON = preload("uid://1haqs5gv5563")
+const EMANCIPATOR_EXOSUIT_STRATAGEM_ICON = preload("uid://bch88r1un3ty")
+const EMS_MORTAR_SENTRY_STRATAGEM_ICON = preload("uid://ch8250yjt3v5g")
+const EPOCH_STRATAGEM_ICON = preload("uid://bvmwqxbd127na")
+const EXPENDABLE_ANTI_TANK_STRATAGEM_ICON = preload("uid://bpfp6r0bpliij")
+const EXPENDABLE_NAPALM_STRATAGEM_ICON = preload("uid://bikjtd6gi4rk0")
+const FAST_RECON_VEHICLE_STRATAGEM_ICON = preload("uid://dm8wa1g77nykx")
+const FLAME_SENTRY_STRATAGEM_ICON = preload("uid://bv7g6014203vf")
+const FLAMETHROWER_STRATAGEM_ICON = preload("uid://dbwo154fiw4v2")
+const GAS_MINES_STRATAGEM_ICON = preload("uid://dv6f7ch5ybokq")
+const GAS_MORTAR_SENTRY_STRATAGEM_ICON = preload("uid://c23yxemfpop4f")
+const GATLING_SENTRY_STRATAGEM_ICON = preload("uid://di4exrkrdbdx0")
+const GRENADE_LAUNCHER_STRATAGEM_ICON = preload("uid://c3fnopjyqdmyr")
+const GRENADIER_BATTLEMENT_STRATAGEM_ICON = preload("uid://c7ootb65i05qt")
+const GUARD_DOG_STRATAGEM_ICON = preload("uid://dbgv02y5xxfr7")
+const HEAVY_MACHINE_GUN_STRATAGEM_ICON = preload("uid://vejdh7xk8p7j")
+const HELLBOMB_STRATAGEM_ICON = preload("uid://biaire5ftqdu6")
+const HMG_EMPLACEMENT_STRATAGEM_ICON = preload("uid://cw4wa8awxlwla")
+const HOT_DOG_STRATAGEM_ICON = preload("uid://bdyygxfhpmlb0")
+const HOVER_PACK_STRATAGEM_ICON = preload("uid://dk55dxfgq8ikk")
+const INCENDIARY_MINES_STRATAGEM_ICON = preload("uid://bt5ddwp15grwp")
+const JUMP_PACK_STRATAGEM_ICON = preload("uid://baq4rgdbfp0ud")
+const K_9_STRATAGEM_ICON = preload("uid://ddx5rt34tg7rl")
+const LASER_CANNON_STRATAGEM_ICON = preload("uid://cxrhht80mwk7m")
+const LASER_SENTRY_STRATAGEM_ICON = preload("uid://cnhvv5gflv1s4")
+const LEVELLER_STRATAGEM_ICON = preload("uid://dgjavbilvj33b")
+const MACHINE_GUN_SENTRY_STRATAGEM_ICON = preload("uid://cogq7o821obn6")
+const MACHINE_GUN_STRATAGEM_ICON = preload("uid://dev15ju2djofe")
+const MAXIGUN_STRATAGEM_ICON = preload("uid://dc0o8mn24bjie")
+const MORTAR_SENTRY_STRATAGEM_ICON = preload("uid://ddl3q6k0okoa7")
+const ONE_TRUE_FLAG_STRATAGEM_ICON = preload("uid://cwtd4ejr1nnsr")
+const ORBITAL_120_MM_HE_BARRAGE_STRATAGEM_ICON = preload("uid://c4jhp5kk5xcct")
+const ORBITAL_380_MM_HE_BARRAGE_STRATAGEM_ICON = preload("uid://b27b3v3io4xiy")
+const ORBITAL_AIRBURST_STRIKE_STRATAGEM_ICON = preload("uid://bksdsu0tifvh5")
+const ORBITAL_EMS_STRIKE_STRATAGEM_ICON = preload("uid://c7o02cswh3at4")
+const ORBITAL_GAS_STRIKE_STRATAGEM_ICON = preload("uid://bldt6mlhfh6ls")
+const ORBITAL_GATLING_BARRAGE_STRATAGEM_ICON = preload("uid://ch1yvw4jniilc")
+const ORBITAL_ILLUMINATION_FLARE_STRATAGEM_ICON = preload("uid://80fg8061yvry")
+const ORBITAL_LASER_STRATAGEM_ICON = preload("uid://b5lhwnq6xkulh")
+const ORBITAL_NAPALM_BARRAGE_STRATAGEM_ICON = preload("uid://cbjrbnqpg2mjc")
+const ORBITAL_PRECISION_STRIKE_STRATAGEM_ICON = preload("uid://b4t68t5xe3wnr")
+const ORBITAL_RAILCANNON_STRIKE_STRATAGEM_ICON = preload("uid://ct6fc47lbkcc4")
+const ORBITAL_SMOKE_STRIKE_STRATAGEM_ICON = preload("uid://dfr23w32rl8w6")
+const ORBITAL_WALKING_BARRAGE_STRATAGEM_ICON = preload("uid://c7u1r2jv72t1x")
+const PATRIOT_EXOSUIT_STRATAGEM_ICON = preload("uid://ddjh8j7cjpfwe")
+const PORTABLE_HELLBOMB_STRATAGEM_ICON = preload("uid://wvayxqxxm3uu")
+const PROSPECTING_DRILL_STRATAGEM_ICON = preload("uid://cy6x4c00g2lr1")
+const QUASAR_CANNON_STRATAGEM_ICON = preload("uid://detlskg6etk71")
+const RAILGUN_STRATAGEM_ICON = preload("uid://digjjovmwev1x")
+const RECOILLESS_RIFLE_STRATAGEM_ICON = preload("uid://cp8vfp2dxency")
+const REINFORCE_STRATAGEM_ICON = preload("uid://cw6mgo747jat")
+const RESUPPLY_STRATAGEM_ICON = preload("uid://c1c4blidicqiw")
+const ROCKET_SENTRY_STRATAGEM_ICON = preload("uid://bu5yux4yurx5l")
+const ROVER_STRATAGEM_ICON = preload("uid://di5va3wtqorye")
+const SEAF_ARTILLERY_STRATAGEM_ICON = preload("uid://be3cpqe7hytnl")
+const SEISMIC_PROBE_STRATAGEM_ICON = preload("uid://bnpk6enp8sxgx")
+const SHIELD_GENERATOR_PACK_STRATAGEM_ICON = preload("uid://cw8nt6dyc26no")
+const SHIELD_GENERATOR_RELAY_STRATAGEM_ICON = preload("uid://c6iyruvlcm6n6")
+const SOLO_SILO_STRATAGEM_ICON = preload("uid://cdwpk8bya7se3")
+const SOS_BEACON_STRATAGEM_ICON = preload("uid://c8ebl7lm5d015")
+const SPEAR_STRATAGEM_ICON = preload("uid://cjndmkhoi7r3d")
+const SPEARGUN_STRATAGEM_ICON = preload("uid://co8ciopbkitan")
+const STALWART_STRATAGEM_ICON = preload("uid://bf0b74eto1q82")
+const START_UPLOAD_STRATAGEM_ICON = preload("uid://b548vm8q5o4lb")
+const STERILIZER_STRATAGEM_ICON = preload("uid://bm2armvopxfsu")
+const STRATAGEM_ARROW_DOWN = preload("uid://b4sgli4cp266i")
+const STRATAGEM_ARROW_LEFT = preload("uid://cdcdfdbvxyd")
+const STRATAGEM_ARROW_RIGHT = preload("uid://4qd5kbllk47s")
+const STRATAGEM_ARROW_UP = preload("uid://b6kj2fqvf63gp")
+const SUPER_EARTH_FLAG_STRATAGEM_ICON = preload("uid://qkfea0c10y6y")
+const SUPPLY_PACK_STRATAGEM_ICON = preload("uid://dug4flgdpoyee")
+const TESLA_TOWER_STRATAGEM_ICON = preload("uid://7wdo66xvnp87")
+const W_A_S_P__LAUNCHER_STRATAGEM_ICON = preload("uid://dj32pqfuw1d1p")
+const WARP_PACK_STRATAGEM_ICON = preload("uid://bwmt438cmwrjy")
+
+const STRATAGEMS = {
+	"AIRBURST_ROCKET_LAUNCHER": {
+		"name": "Airburst Rocket Launcher",
+		"icon": AIRBURST_ROCKET_LAUNCHER_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.UP, ARROW.UP, ARROW.LEFT, ARROW.RIGHT],
+	},
+	"ANTI_MATERIEL_RIFLE": {
+		"name": "Anti-Materiel Rifle",
+		"icon": ANTI_MATERIEL_RIFLE_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.LEFT, ARROW.RIGHT, ARROW.UP, ARROW.DOWN],
+	},
+	"ANTI_PERSONNEL_MINEFIELD": {
+		"name": "Anti-Personnel Minefield",
+		"icon": ANTI_PERSONNEL_MINEFIELD_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.LEFT, ARROW.UP, ARROW.RIGHT],
+	},
+	"ANTI_TANK_EMPLACEMENT": {
+		"name": "Anti-Tank Emplacement",
+		"icon": ANTI_TANK_EMPLACEMENT_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.UP, ARROW.LEFT, ARROW.RIGHT, ARROW.RIGHT, ARROW.RIGHT],
+	},
+	"ANTI_TANK_MINES": {
+		"name": "Anti-Tank Mines",
+		"icon": ANTI_TANK_MINES_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.LEFT, ARROW.UP, ARROW.UP],
+	},
+	"ARC_THROWER": {
+		"name": "Arc Thrower",
+		"icon": ARC_THROWER_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.RIGHT, ARROW.DOWN, ARROW.UP, ARROW.LEFT, ARROW.LEFT],
+	},
+	"AUTOCANNON_SENTRY": {
+		"name": "Autocannon Sentry",
+		"icon": AUTOCANNON_SENTRY_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.UP, ARROW.RIGHT, ARROW.UP, ARROW.LEFT, ARROW.UP],
+	},
+	"AUTOCANNON": {
+		"name": "Autocannon",
+		"icon": AUTOCANNON_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.LEFT, ARROW.DOWN, ARROW.UP, ARROW.UP, ARROW.RIGHT],
+	},
+	"BALLISTIC_SHIELD_BACKPACK": {
+		"name": "Ballistic Shield Backpack",
+		"icon": BALLISTIC_SHIELD_BACKPACK_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.LEFT, ARROW.DOWN, ARROW.DOWN, ARROW.UP, ARROW.LEFT],
+	},
+	"BASTION_MK_XVI": {
+		"name": "Bastion MK XVI",
+		"icon": BASTION_MK_XVI_STRATAGEM_ICON,
+		"sequence": [ARROW.LEFT, ARROW.DOWN, ARROW.RIGHT, ARROW.DOWN, ARROW.LEFT, ARROW.DOWN, ARROW.UP, ARROW.DOWN, ARROW.UP],
+	},
+	"BELT_FED_GRENADE_LAUNCHER": {
+		"name": "Belt-Fed Grenade Launcher",
+		"icon": BELT_FED_GRENADE_LAUNCHER_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.LEFT, ARROW.UP, ARROW.LEFT, ARROW.UP, ARROW.UP],
+	},
+	"BREACHING_HAMMER": {
+		"name": "Breaching Hammer",
+		"icon": BREACHING_HAMMER_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.LEFT, ARROW.RIGHT, ARROW.LEFT, ARROW.UP],
+	},
+	"C_4_PACK": {
+		"name": "C-4 Pack",
+		"icon": C_4_PACK_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.RIGHT, ARROW.UP, ARROW.UP, ARROW.RIGHT, ARROW.UP],
+	},
+	"CALL_IN_SUPER_DESTROYER": {
+		"name": "Call In Super Destroyer",
+		"icon": CALL_IN_SUPER_DESTROYER_STRATAGEM_ICON,
+		"sequence": [ARROW.UP, ARROW.UP, ARROW.DOWN, ARROW.DOWN, ARROW.LEFT, ARROW.RIGHT, ARROW.LEFT, ARROW.RIGHT],
+	},
+	"CARGO_CONTAINER": {
+		"name": "Cargo Container",
+		"icon": CARGO_CONTAINER_STRATAGEM_ICON,
+		"sequence": [ARROW.UP, ARROW.UP, ARROW.DOWN, ARROW.DOWN, ARROW.RIGHT, ARROW.DOWN],
+	},
+	"COMMANDO": {
+		"name": "Commando",
+		"icon": COMMANDO_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.LEFT, ARROW.UP, ARROW.DOWN, ARROW.RIGHT],
+	},
+	"CREMATOR": {
+		"name": "Cremator",
+		"icon": CREMATOR_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.LEFT, ARROW.UP, ARROW.UP, ARROW.LEFT],
+	},
+	"DARK_FLUID_VESSEL": {
+		"name": "Dark Fluid Vessel",
+		"icon": DARK_FLUID_VESSEL_STRATAGEM_ICON,
+		"sequence": [ARROW.UP, ARROW.LEFT, ARROW.RIGHT, ARROW.DOWN, ARROW.UP, ARROW.UP],
+	},
+	"DE_ESCALATOR": {
+		"name": "De-Escalator",
+		"icon": DE_ESCALATOR_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.RIGHT, ARROW.UP, ARROW.LEFT, ARROW.RIGHT],
+	},
+	"DEFOLIATION_TOOL": {
+		"name": "Defoliation Tool",
+		"icon": DEFOLIATION_TOOL_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.LEFT, ARROW.RIGHT, ARROW.RIGHT, ARROW.DOWN],
+	},
+	"DIRECTIONAL_SHIELD": {
+		"name": "Directional Shield",
+		"icon": DIRECTIONAL_SHIELD_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.UP, ARROW.LEFT, ARROW.RIGHT, ARROW.UP, ARROW.UP],
+	},
+	"DOG_BREATH": {
+		"name": "Dog Breath",
+		"icon": DOG_BREATH_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.UP, ARROW.LEFT, ARROW.UP, ARROW.RIGHT, ARROW.UP],
+	},
+	"EAGLE_110_MM_ROCKET_PODS": {
+		"name": "Eagle 110 MM Rocket Pods",
+		"icon": EAGLE_110_MM_ROCKET_PODS_STRATAGEM_ICON,
+		"sequence": [ARROW.UP, ARROW.RIGHT, ARROW.UP, ARROW.LEFT],
+	},
+	"EAGLE_500_KG_BOMB": {
+		"name": "Eagle 500 KG Bomb",
+		"icon": EAGLE_500_KG_BOMB_STRATAGEM_ICON,
+		"sequence": [ARROW.UP, ARROW.RIGHT, ARROW.DOWN, ARROW.DOWN, ARROW.DOWN],
+	},
+	"EAGLE_AIRSTRIKE": {
+		"name": "Eagle Airstrike",
+		"icon": EAGLE_AIRSTRIKE_STRATAGEM_ICON,
+		"sequence": [ARROW.UP, ARROW.RIGHT, ARROW.DOWN, ARROW.RIGHT],
+	},
+	"EAGLE_CLUSTER_BOMB": {
+		"name": "Eagle Cluster Bomb",
+		"icon": EAGLE_CLUSTER_BOMB_STRATAGEM_ICON,
+		"sequence": [ARROW.UP, ARROW.RIGHT, ARROW.DOWN, ARROW.DOWN, ARROW.RIGHT],
+	},
+	"EAGLE_NAPALM_AIRSTRIKE": {
+		"name": "Eagle Napalm Airstrike",
+		"icon": EAGLE_NAPALM_AIRSTRIKE_STRATAGEM_ICON,
+		"sequence": [ARROW.UP, ARROW.RIGHT, ARROW.DOWN, ARROW.UP],
+	},
+	"EAGLE_REARM": {
+		"name": "Eagle Rearm",
+		"icon": EAGLE_REARM_STRATAGEM_ICON,
+		"sequence": [ARROW.UP, ARROW.UP, ARROW.LEFT, ARROW.UP, ARROW.RIGHT],
+	},
+	"EAGLE_SMOKE_STRIKE": {
+		"name": "Eagle Smoke Strike",
+		"icon": EAGLE_SMOKE_STRIKE_STRATAGEM_ICON,
+		"sequence": [ARROW.UP, ARROW.RIGHT, ARROW.UP, ARROW.DOWN],
+	},
+	"EAGLE_STRAFING_RUN": {
+		"name": "Eagle Strafing Run",
+		"icon": EAGLE_STRAFING_RUN_STRATAGEM_ICON,
+		"sequence": [ARROW.UP, ARROW.RIGHT, ARROW.RIGHT],
+	},
+	"EMANCIPATOR_EXOSUIT": {
+		"name": "Emancipator Exosuit",
+		"icon": EMANCIPATOR_EXOSUIT_STRATAGEM_ICON,
+		"sequence": [ARROW.LEFT, ARROW.DOWN, ARROW.RIGHT, ARROW.UP, ARROW.LEFT, ARROW.DOWN, ARROW.UP],
+	},
+	"EMS_MORTAR_SENTRY": {
+		"name": "EMS Mortar Sentry",
+		"icon": EMS_MORTAR_SENTRY_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.UP, ARROW.RIGHT, ARROW.DOWN, ARROW.RIGHT],
+	},
+	"EPOCH": {
+		"name": "Epoch",
+		"icon": EPOCH_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.LEFT, ARROW.UP, ARROW.LEFT, ARROW.RIGHT],
+	},
+	"EXPENDABLE_ANTI_TANK": {
+		"name": "Expendable Anti-Tank",
+		"icon": EXPENDABLE_ANTI_TANK_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.DOWN, ARROW.LEFT, ARROW.UP, ARROW.RIGHT],
+	},
+	"EXPENDABLE_NAPALM": {
+		"name": "Expendable Napalm",
+		"icon": EXPENDABLE_NAPALM_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.DOWN, ARROW.LEFT, ARROW.UP, ARROW.LEFT],
+	},
+	"FAST_RECON_VEHICLE": {
+		"name": "Fast Recon Vehicle",
+		"icon": FAST_RECON_VEHICLE_STRATAGEM_ICON,
+		"sequence": [ARROW.LEFT, ARROW.DOWN, ARROW.RIGHT, ARROW.DOWN, ARROW.RIGHT, ARROW.DOWN, ARROW.UP],
+	},
+	"FLAME_SENTRY": {
+		"name": "Flame Sentry",
+		"icon": FLAME_SENTRY_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.UP, ARROW.RIGHT, ARROW.DOWN, ARROW.UP, ARROW.UP],
+	},
+	"FLAMETHROWER": {
+		"name": "Flamethrower",
+		"icon": FLAMETHROWER_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.LEFT, ARROW.UP, ARROW.DOWN, ARROW.UP],
+	},
+	"GAS_MINES": {
+		"name": "Gas Mines",
+		"icon": GAS_MINES_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.LEFT, ARROW.LEFT, ARROW.RIGHT],
+	},
+	"GAS_MORTAR_SENTRY": {
+		"name": "Gas Mortar Sentry",
+		"icon": GAS_MORTAR_SENTRY_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.UP, ARROW.RIGHT, ARROW.RIGHT, ARROW.DOWN],
+	},
+	"GATLING_SENTRY": {
+		"name": "Gatling Sentry",
+		"icon": GATLING_SENTRY_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.UP, ARROW.RIGHT, ARROW.LEFT],
+	},
+	"GRENADE_LAUNCHER": {
+		"name": "Grenade Launcher",
+		"icon": GRENADE_LAUNCHER_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.LEFT, ARROW.UP, ARROW.LEFT, ARROW.DOWN],
+	},
+	"GRENADIER_BATTLEMENT": {
+		"name": "Grenadier Battlement",
+		"icon": GRENADIER_BATTLEMENT_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.RIGHT, ARROW.DOWN, ARROW.LEFT, ARROW.RIGHT],
+	},
+	"GUARD_DOG": {
+		"name": "Guard Dog",
+		"icon": GUARD_DOG_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.UP, ARROW.LEFT, ARROW.UP, ARROW.RIGHT, ARROW.DOWN],
+	},
+	"HEAVY_MACHINE_GUN": {
+		"name": "Heavy Machine Gun",
+		"icon": HEAVY_MACHINE_GUN_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.LEFT, ARROW.UP, ARROW.DOWN, ARROW.DOWN],
+	},
+	"HELLBOMB": {
+		"name": "Hellbomb",
+		"icon": HELLBOMB_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.UP, ARROW.LEFT, ARROW.DOWN, ARROW.UP, ARROW.RIGHT, ARROW.DOWN, ARROW.UP],
+	},
+	"HMG_EMPLACEMENT": {
+		"name": "HMG Emplacement",
+		"icon": HMG_EMPLACEMENT_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.UP, ARROW.LEFT, ARROW.RIGHT, ARROW.RIGHT, ARROW.LEFT],
+	},
+	"HOT_DOG": {
+		"name": "Hot Dog",
+		"icon": HOT_DOG_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.UP, ARROW.LEFT, ARROW.UP, ARROW.LEFT, ARROW.LEFT],
+	},
+	"HOVER_PACK": {
+		"name": "Hover Pack",
+		"icon": HOVER_PACK_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.UP, ARROW.UP, ARROW.DOWN, ARROW.LEFT, ARROW.RIGHT],
+	},
+	"INCENDIARY_MINES": {
+		"name": "Incendiary Mines",
+		"icon": INCENDIARY_MINES_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.LEFT, ARROW.LEFT, ARROW.DOWN],
+	},
+	"JUMP_PACK": {
+		"name": "Jump Pack",
+		"icon": JUMP_PACK_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.UP, ARROW.UP, ARROW.DOWN, ARROW.UP],
+	},
+	"K_9": {
+		"name": "K-9",
+		"icon": K_9_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.UP, ARROW.LEFT, ARROW.UP, ARROW.RIGHT, ARROW.LEFT],
+	},
+	"LASER_CANNON": {
+		"name": "Laser Cannon",
+		"icon": LASER_CANNON_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.LEFT, ARROW.DOWN, ARROW.UP, ARROW.LEFT],
+	},
+	"LASER_SENTRY": {
+		"name": "Laser Sentry",
+		"icon": LASER_SENTRY_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.UP, ARROW.RIGHT, ARROW.DOWN, ARROW.UP, ARROW.RIGHT],
+	},
+	"LEVELLER": {
+		"name": "Leveller",
+		"icon": LEVELLER_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.DOWN, ARROW.LEFT, ARROW.UP, ARROW.DOWN],
+	},
+	"MACHINE_GUN_SENTRY": {
+		"name": "Machine Gun Sentry",
+		"icon": MACHINE_GUN_SENTRY_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.UP, ARROW.RIGHT, ARROW.RIGHT, ARROW.UP],
+	},
+	"MACHINE_GUN": {
+		"name": "Machine Gun",
+		"icon": MACHINE_GUN_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.LEFT, ARROW.DOWN, ARROW.UP, ARROW.RIGHT],
+	},
+	"MAXIGUN": {
+		"name": "Maxigun",
+		"icon": MAXIGUN_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.LEFT, ARROW.RIGHT, ARROW.DOWN, ARROW.UP, ARROW.UP],
+	},
+	"MORTAR_SENTRY": {
+		"name": "Mortar Sentry",
+		"icon": MORTAR_SENTRY_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.UP, ARROW.RIGHT, ARROW.RIGHT, ARROW.DOWN],
+	},
+	"ONE_TRUE_FLAG": {
+		"name": "One True Flag",
+		"icon": ONE_TRUE_FLAG_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.LEFT, ARROW.RIGHT, ARROW.RIGHT, ARROW.UP],
+	},
+	"ORBITAL_120_MM_HE_BARRAGE": {
+		"name": "Orbital 120 MM HE Barrage",
+		"icon": ORBITAL_120_MM_HE_BARRAGE_STRATAGEM_ICON,
+		"sequence": [ARROW.RIGHT, ARROW.RIGHT, ARROW.DOWN, ARROW.LEFT, ARROW.RIGHT, ARROW.DOWN],
+	},
+	"ORBITAL_380_MM_HE_BARRAGE": {
+		"name": "Orbital 380 MM HE Barrage",
+		"icon": ORBITAL_380_MM_HE_BARRAGE_STRATAGEM_ICON,
+		"sequence": [ARROW.RIGHT, ARROW.DOWN, ARROW.UP, ARROW.UP, ARROW.LEFT, ARROW.DOWN, ARROW.DOWN],
+	},
+	"ORBITAL_AIRBURST_STRIKE": {
+		"name": "Orbital Airburst Strike",
+		"icon": ORBITAL_AIRBURST_STRIKE_STRATAGEM_ICON,
+		"sequence": [ARROW.RIGHT, ARROW.RIGHT, ARROW.RIGHT],
+	},
+	"ORBITAL_EMS_STRIKE": {
+		"name": "Orbital EMS Strike",
+		"icon": ORBITAL_EMS_STRIKE_STRATAGEM_ICON,
+		"sequence": [ARROW.RIGHT, ARROW.RIGHT, ARROW.LEFT, ARROW.DOWN],
+	},
+	"ORBITAL_GAS_STRIKE": {
+		"name": "Orbital Gas Strike",
+		"icon": ORBITAL_GAS_STRIKE_STRATAGEM_ICON,
+		"sequence": [ARROW.RIGHT, ARROW.RIGHT, ARROW.DOWN, ARROW.RIGHT],
+	},
+	"ORBITAL_GATLING_BARRAGE": {
+		"name": "Orbital Gatling Barrage",
+		"icon": ORBITAL_GATLING_BARRAGE_STRATAGEM_ICON,
+		"sequence": [ARROW.RIGHT, ARROW.DOWN, ARROW.LEFT, ARROW.UP, ARROW.UP],
+	},
+	"ORBITAL_ILLUMINATION_FLARE": {
+		"name": "Orbital Illumination Flare",
+		"icon": ORBITAL_ILLUMINATION_FLARE_STRATAGEM_ICON,
+		"sequence": [ARROW.RIGHT, ARROW.RIGHT, ARROW.RIGHT, ARROW.LEFT, ARROW.LEFT, ARROW.LEFT],
+	},
+	"ORBITAL_LASER": {
+		"name": "Orbital Laser",
+		"icon": ORBITAL_LASER_STRATAGEM_ICON,
+		"sequence": [ARROW.RIGHT, ARROW.DOWN, ARROW.UP, ARROW.RIGHT, ARROW.DOWN],
+	},
+	"ORBITAL_NAPALM_BARRAGE": {
+		"name": "Orbital Napalm Barrage",
+		"icon": ORBITAL_NAPALM_BARRAGE_STRATAGEM_ICON,
+		"sequence": [ARROW.RIGHT, ARROW.RIGHT, ARROW.DOWN, ARROW.LEFT, ARROW.RIGHT, ARROW.UP],
+	},
+	"ORBITAL_PRECISION_STRIKE": {
+		"name": "Orbital Precision Strike",
+		"icon": ORBITAL_PRECISION_STRIKE_STRATAGEM_ICON,
+		"sequence": [ARROW.RIGHT, ARROW.RIGHT, ARROW.UP],
+	},
+	"ORBITAL_RAILCANNON_STRIKE": {
+		"name": "Orbital Railcannon Strike",
+		"icon": ORBITAL_RAILCANNON_STRIKE_STRATAGEM_ICON,
+		"sequence": [ARROW.RIGHT, ARROW.UP, ARROW.DOWN, ARROW.DOWN, ARROW.RIGHT],
+	},
+	"ORBITAL_SMOKE_STRIKE": {
+		"name": "Orbital Smoke Strike",
+		"icon": ORBITAL_SMOKE_STRIKE_STRATAGEM_ICON,
+		"sequence": [ARROW.RIGHT, ARROW.RIGHT, ARROW.DOWN, ARROW.UP],
+	},
+	"ORBITAL_WALKING_BARRAGE": {
+		"name": "Orbital Walking Barrage",
+		"icon": ORBITAL_WALKING_BARRAGE_STRATAGEM_ICON,
+		"sequence": [ARROW.RIGHT, ARROW.DOWN, ARROW.RIGHT, ARROW.DOWN, ARROW.RIGHT, ARROW.DOWN],
+	},
+	"PATRIOT_EXOSUIT": {
+		"name": "Patriot Exosuit",
+		"icon": PATRIOT_EXOSUIT_STRATAGEM_ICON,
+		"sequence": [ARROW.LEFT, ARROW.DOWN, ARROW.RIGHT, ARROW.UP, ARROW.LEFT, ARROW.DOWN, ARROW.DOWN],
+	},
+	"PORTABLE_HELLBOMB": {
+		"name": "Portable Hellbomb",
+		"icon": PORTABLE_HELLBOMB_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.RIGHT, ARROW.UP, ARROW.UP, ARROW.UP],
+	},
+	"PROSPECTING_DRILL": {
+		"name": "Prospecting Drill",
+		"icon": PROSPECTING_DRILL_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.DOWN, ARROW.LEFT, ARROW.RIGHT, ARROW.DOWN, ARROW.DOWN],
+	},
+	"QUASAR_CANNON": {
+		"name": "Quasar Cannon",
+		"icon": QUASAR_CANNON_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.DOWN, ARROW.UP, ARROW.LEFT, ARROW.RIGHT],
+	},
+	"RAILGUN": {
+		"name": "Railgun",
+		"icon": RAILGUN_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.RIGHT, ARROW.DOWN, ARROW.UP, ARROW.LEFT, ARROW.RIGHT],
+	},
+	"RECOILLESS_RIFLE": {
+		"name": "Recoilless Rifle",
+		"icon": RECOILLESS_RIFLE_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.LEFT, ARROW.RIGHT, ARROW.RIGHT, ARROW.LEFT],
+	},
+	"REINFORCE": {
+		"name": "Reinforce",
+		"icon": REINFORCE_STRATAGEM_ICON,
+		"sequence": [ARROW.UP, ARROW.DOWN, ARROW.RIGHT, ARROW.LEFT, ARROW.UP],
+	},
+	"RESUPPLY": {
+		"name": "Resupply",
+		"icon": RESUPPLY_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.DOWN, ARROW.UP, ARROW.RIGHT],
+	},
+	"ROCKET_SENTRY": {
+		"name": "Rocket Sentry",
+		"icon": ROCKET_SENTRY_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.UP, ARROW.RIGHT, ARROW.RIGHT, ARROW.LEFT],
+	},
+	"ROVER": {
+		"name": "Rover",
+		"icon": ROVER_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.UP, ARROW.LEFT, ARROW.UP, ARROW.RIGHT, ARROW.RIGHT],
+	},
+	"SEAF_ARTILLERY": {
+		"name": "SEAF Artillery",
+		"icon": SEAF_ARTILLERY_STRATAGEM_ICON,
+		"sequence": [ARROW.RIGHT, ARROW.UP, ARROW.UP, ARROW.DOWN],
+	},
+	"SEISMIC_PROBE": {
+		"name": "Seismic Probe",
+		"icon": SEISMIC_PROBE_STRATAGEM_ICON,
+		"sequence": [ARROW.UP, ARROW.UP, ARROW.LEFT, ARROW.RIGHT, ARROW.DOWN, ARROW.DOWN],
+	},
+	"SHIELD_GENERATOR_PACK": {
+		"name": "Shield Generator Pack",
+		"icon": SHIELD_GENERATOR_PACK_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.UP, ARROW.LEFT, ARROW.RIGHT, ARROW.LEFT, ARROW.RIGHT],
+	},
+	"SHIELD_GENERATOR_RELAY": {
+		"name": "Shield Generator Relay",
+		"icon": SHIELD_GENERATOR_RELAY_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.DOWN, ARROW.LEFT, ARROW.RIGHT, ARROW.LEFT, ARROW.RIGHT],
+	},
+	"SOLO_SILO": {
+		"name": "Solo Silo",
+		"icon": SOLO_SILO_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.UP, ARROW.RIGHT, ARROW.DOWN, ARROW.DOWN],
+	},
+	"SOS_BEACON": {
+		"name": "SOS Beacon",
+		"icon": SOS_BEACON_STRATAGEM_ICON,
+		"sequence": [ARROW.UP, ARROW.DOWN, ARROW.RIGHT, ARROW.UP],
+	},
+	"SPEAR": {
+		"name": "Spear",
+		"icon": SPEAR_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.DOWN, ARROW.UP, ARROW.DOWN, ARROW.DOWN],
+	},
+	"SPEARGUN": {
+		"name": "Speargun",
+		"icon": SPEARGUN_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.RIGHT, ARROW.DOWN, ARROW.LEFT, ARROW.UP, ARROW.RIGHT],
+	},
+	"STALWART": {
+		"name": "Stalwart",
+		"icon": STALWART_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.LEFT, ARROW.DOWN, ARROW.UP, ARROW.UP, ARROW.LEFT],
+	},
+	"START_UPLOAD": {
+		"name": "Start Upload",
+		"icon": START_UPLOAD_STRATAGEM_ICON,
+		"sequence": [ARROW.LEFT, ARROW.RIGHT, ARROW.UP, ARROW.UP, ARROW.UP],
+	},
+	"STERILIZER": {
+		"name": "Sterilizer",
+		"icon": STERILIZER_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.LEFT, ARROW.UP, ARROW.DOWN, ARROW.LEFT],
+	},
+	"SUPER_EARTH_FLAG": {
+		"name": "Super Earth Flag",
+		"icon": SUPER_EARTH_FLAG_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.UP, ARROW.DOWN, ARROW.UP],
+	},
+	"SUPPLY_PACK": {
+		"name": "Supply Pack",
+		"icon": SUPPLY_PACK_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.LEFT, ARROW.DOWN, ARROW.UP, ARROW.UP, ARROW.DOWN],
+	},
+	"TESLA_TOWER": {
+		"name": "Tesla Tower",
+		"icon": TESLA_TOWER_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.UP, ARROW.RIGHT, ARROW.UP, ARROW.LEFT, ARROW.RIGHT],
+	},
+	"W_A_S_P__LAUNCHER": {
+		"name": "W.A.S.P. Launcher",
+		"icon": W_A_S_P__LAUNCHER_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.DOWN, ARROW.UP, ARROW.DOWN, ARROW.RIGHT],
+	},
+	"WARP_PACK": {
+		"name": "Warp Pack",
+		"icon": WARP_PACK_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.LEFT, ARROW.RIGHT, ARROW.DOWN, ARROW.LEFT, ARROW.RIGHT],
+	},
+}
+
+
+static func get_stratagem_category(strat_id: String) -> String:
+	if STRATAGEM_CATEGORY_OVERRIDES.has(strat_id):
+		return STRATAGEM_CATEGORY_OVERRIDES[strat_id]
+	if strat_id.begins_with("ORBITAL_"):
+		return "orbital"
+	if strat_id.begins_with("EAGLE_"):
+		return "eagle"
+	return "support"

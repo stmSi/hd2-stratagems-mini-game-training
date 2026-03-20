@@ -1,0 +1,18 @@
+[gd_scene format=3 uid="uid://cyym5u4uhcd1l"]
+
+[ext_resource type="Script" uid="uid://c4sx8psy7a328" path="res://train.gd" id="1_bju55"]
+[ext_resource type="PackedScene" uid="uid://b6bpqdoqlpgl1" path="res://strategem_box.tscn" id="2_lomod"]
+
+[node name="Train" type="Node" unique_id=2123296018]
+script = ExtResource("1_bju55")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1220690916]
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_top = -92.0
+offset_right = 403.0
+offset_bottom = 92.0
+grow_vertical = 2
+
+[node name="StrategemBox" parent="." unique_id=1231085371 instance=ExtResource("2_lomod")]

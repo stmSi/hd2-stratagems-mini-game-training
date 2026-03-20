@@ -1,0 +1,10 @@
+Credits / Sources
+=================
+
+SVG icon source
+---------------
+- https://github.com/nvigneux/Helldivers-2-Stratagems-icons-svg
+
+Stratagem data source
+---------------------
+- https://github.com/k33bs/Helldivers-2-Stratagem-JSON-Generator

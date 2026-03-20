@@ -1,0 +1,58 @@
+[gd_scene format=3 uid="uid://b6bpqdoqlpgl1"]
+
+[ext_resource type="Script" uid="uid://bry75j2urqci2" path="res://strategem_box.gd" id="1_nlmhf"]
+[ext_resource type="Texture2D" uid="uid://dg1pmwfpwxg8d" path="res://Assets/high-reso/Autocannon Sentry Stratagem Icon.svg" id="2_53hlh"]
+[ext_resource type="PackedScene" uid="uid://bs2ww5vda85fw" path="res://arrow_code_icon.tscn" id="3_1odh4"]
+
+[node name="Strategem" type="HBoxContainer" unique_id=1231085371]
+theme_override_constants/separation = 20
+script = ExtResource("1_nlmhf")
+
+[node name="StrategemInfo" type="HBoxContainer" parent="." unique_id=1595504872]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="StrategemIcon" type="TextureRect" parent="StrategemInfo" unique_id=1716883158]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(100, 100)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+texture = ExtResource("2_53hlh")
+expand_mode = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1255415003]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 4
+
+[node name="StrategemName" type="Label" parent="VBoxContainer" unique_id=792118642]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 48
+text = "Autocannon"
+
+[node name="StrategemCodes" type="HBoxContainer" parent="VBoxContainer" unique_id=1226784705]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="ArrowCodeIcon" parent="VBoxContainer/StrategemCodes" unique_id=122008588 instance=ExtResource("3_1odh4")]
+layout_mode = 2
+
+[node name="ArrowCodeIcon2" parent="VBoxContainer/StrategemCodes" unique_id=1674434589 instance=ExtResource("3_1odh4")]
+layout_mode = 2
+current_arrow = 1
+
+[node name="ArrowCodeIcon3" parent="VBoxContainer/StrategemCodes" unique_id=1789813221 instance=ExtResource("3_1odh4")]
+layout_mode = 2
+current_arrow = 2
+
+[node name="ArrowCodeIcon4" parent="VBoxContainer/StrategemCodes" unique_id=1647253947 instance=ExtResource("3_1odh4")]
+layout_mode = 2
+current_arrow = 3
+
+[node name="ArrowCodeIcon5" parent="VBoxContainer/StrategemCodes" unique_id=592057797 instance=ExtResource("3_1odh4")]
+layout_mode = 2
+current_arrow = 1
