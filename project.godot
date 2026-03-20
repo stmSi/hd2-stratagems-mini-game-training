@@ -13,11 +13,20 @@ config_version=5
 config/name="hd2-strategem-mini-game"
 run/main_scene="uid://vsgkv720n8qc"
 config/features=PackedStringArray("4.6", "GL Compatibility")
+boot_splash/bg_color=Color(0.027451, 0.0470588, 0.0745098, 1)
+boot_splash/image="uid://bcxxke6f53ygf"
 config/icon="res://icon.svg"
 
 [autoload]
 
 Global="*uid://drhndmmexa8v6"
+
+[display]
+
+window/size/viewport_width=1600
+window/size/viewport_height=900
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
 
 [gui]
 

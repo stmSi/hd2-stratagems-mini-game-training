@@ -84,6 +84,8 @@ jobs:
           "$GODOT_BIN" --headless --path "$GITHUB_WORKSPACE" --export-release "Windows Desktop" "$GITHUB_WORKSPACE/build/windows/hd2-strategem-mini-game.exe"
           "$GODOT_BIN" --headless --path "$GITHUB_WORKSPACE" --export-release "Linux" "$GITHUB_WORKSPACE/build/linux/hd2-strategem-mini-game.x86_64"
           "$GODOT_BIN" --headless --path "$GITHUB_WORKSPACE" --export-release "Web" "$GITHUB_WORKSPACE/build/web/index.html"
+          cp "$GITHUB_WORKSPACE/Web/cover.jpg" "$GITHUB_WORKSPACE/build/web/cover.jpg"
+          rm -f "$GITHUB_WORKSPACE/build/web/index.png"
 
       - name: Configure GitHub Pages
         if: (github.event_name == 'workflow_dispatch' || github.event_name == 'push') && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
