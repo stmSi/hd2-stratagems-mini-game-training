@@ -1,6 +1,8 @@
 # Helldivers 2 Strategem Mini Game
 
-Practice/Training Mini-game for practicing Helldivers 2 stratagem input sequences in Godot.
+Practice/Training Mini-game for practicing Helldivers 2 stratagem input sequences.
+
+Made with [Godot Engine](https://godotengine.org/).
 
 ## Play Online
 
