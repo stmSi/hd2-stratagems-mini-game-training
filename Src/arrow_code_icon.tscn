@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://bs2ww5vda85fw"]
+
+[ext_resource type="Texture2D" uid="uid://b4sgli4cp266i" path="res://Assets/icons/Stratagem Arrow Down.svg" id="1_qo0ax"]
+[ext_resource type="Script" uid="uid://ddyahqlxdnn61" path="res://Src/arrow_code_icon.gd" id="2_b518f"]
+
+[node name="ArrowCodeIcon" type="TextureRect" unique_id=122008588]
+custom_minimum_size = Vector2(70, 70)
+texture = ExtResource("1_qo0ax")
+expand_mode = 1
+script = ExtResource("2_b518f")

@@ -1,0 +1,13 @@
+[gd_scene format=3 uid="uid://cw23thcgkm5wx"]
+
+[ext_resource type="Texture2D" uid="uid://dscxckl43wyd5" path="res://Assets/icons/Airburst Rocket Launcher Stratagem Icon.svg" id="1_rnuk3"]
+[ext_resource type="Script" uid="uid://fgk5eh4f1hcu" path="res://Src/strat_icon.gd" id="2_kg7bl"]
+
+[node name="StratIcon" type="TextureButton" unique_id=347446860]
+custom_minimum_size = Vector2(80, 80)
+texture_normal = ExtResource("1_rnuk3")
+ignore_texture_size = true
+stretch_mode = 0
+script = ExtResource("2_kg7bl")
+
+[connection signal="gui_input" from="." to="." method="_on_gui_input"]
