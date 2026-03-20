@@ -2,8 +2,15 @@ extends Node
 
 enum ARROW {DOWN, LEFT, UP, RIGHT}
 
-const STRATAGEM_CATEGORY_ORDER = ["orbital", "eagle", "support", "defensive", "mission"]
+const PRACTICE_CONFIG_PATH = "user://practice_config.cfg"
+const MAIN_SCENE_PATH = "res://Src/main.tscn"
+const TRAIN_SCENE_PATH = "res://Src/train.tscn"
+const DEFAULT_AUDIO_VOLUME = 0.7
+const DEFAULT_SHOW_STRATAGEM_ARROWS = true
+
+const STRATAGEM_CATEGORY_ORDER = ["priority", "orbital", "eagle", "support", "defensive", "mission"]
 const STRATAGEM_CATEGORY_LABELS = {
+	"priority": "Important",
 	"orbital": "Orbital",
 	"eagle": "Eagle",
 	"support": "Support",
@@ -11,6 +18,7 @@ const STRATAGEM_CATEGORY_LABELS = {
 	"mission": "Mission",
 }
 const STRATAGEM_CATEGORY_COLORS = {
+	"priority": Color("ffe27a"),
 	"orbital": Color("ff6f61"),
 	"eagle": Color("ff8f3d"),
 	"support": Color("7cb7ff"),
@@ -46,8 +54,8 @@ const STRATAGEM_CATEGORY_OVERRIDES = {
 	"ONE_TRUE_FLAG": "support",
 	"PORTABLE_HELLBOMB": "support",
 	"PROSPECTING_DRILL": "mission",
-	"REINFORCE": "mission",
-	"RESUPPLY": "mission",
+	"REINFORCE": "priority",
+	"RESUPPLY": "priority",
 	"SEAF_ARTILLERY": "mission",
 	"SEISMIC_PROBE": "mission",
 	"SOLO_SILO": "support",
@@ -397,7 +405,7 @@ const STRATAGEMS = {
 		"sequence": [ARROW.DOWN, ARROW.UP, ARROW.LEFT, ARROW.RIGHT, ARROW.RIGHT, ARROW.LEFT],
 	},
 	"HOT_DOG": {
-		"name": "Hot Dog",
+		"name": "Guard Dog Hot",
 		"icon": HOT_DOG_STRATAGEM_ICON,
 		"sequence": [ARROW.DOWN, ARROW.UP, ARROW.LEFT, ARROW.UP, ARROW.LEFT, ARROW.LEFT],
 	},
@@ -417,7 +425,7 @@ const STRATAGEMS = {
 		"sequence": [ARROW.DOWN, ARROW.UP, ARROW.UP, ARROW.DOWN, ARROW.UP],
 	},
 	"K_9": {
-		"name": "K-9",
+		"name": "Guard Dog K-9",
 		"icon": K_9_STRATAGEM_ICON,
 		"sequence": [ARROW.DOWN, ARROW.UP, ARROW.LEFT, ARROW.UP, ARROW.RIGHT, ARROW.LEFT],
 	},
@@ -572,7 +580,7 @@ const STRATAGEMS = {
 		"sequence": [ARROW.DOWN, ARROW.UP, ARROW.RIGHT, ARROW.RIGHT, ARROW.LEFT],
 	},
 	"ROVER": {
-		"name": "Rover",
+		"name": "Guard Dog Rover",
 		"icon": ROVER_STRATAGEM_ICON,
 		"sequence": [ARROW.DOWN, ARROW.UP, ARROW.LEFT, ARROW.UP, ARROW.RIGHT, ARROW.RIGHT],
 	},
@@ -667,3 +675,58 @@ static func get_stratagem_category(strat_id: String) -> String:
 	if strat_id.begins_with("EAGLE_"):
 		return "eagle"
 	return "support"
+
+
+static func load_practice_config() -> Dictionary:
+	var config := ConfigFile.new()
+	var data := {
+		"selected_strat_ids": [],
+		"randomize_mode": false,
+		"audio_volume": DEFAULT_AUDIO_VOLUME,
+		"show_stratagem_arrows": DEFAULT_SHOW_STRATAGEM_ARROWS,
+	}
+
+	if config.load(PRACTICE_CONFIG_PATH) != OK:
+		return data
+
+	var sanitized_ids: Array[String] = []
+	var stored_ids: Array = config.get_value("practice", "selected_strat_ids", [])
+	for value in stored_ids:
+		var strat_id := str(value)
+		if STRATAGEMS.has(strat_id) and not sanitized_ids.has(strat_id):
+			sanitized_ids.append(strat_id)
+
+	data["selected_strat_ids"] = sanitized_ids
+	data["randomize_mode"] = bool(config.get_value("practice", "randomize_mode", false))
+	data["audio_volume"] = clampf(float(config.get_value("practice", "audio_volume", DEFAULT_AUDIO_VOLUME)), 0.0, 1.0)
+	data["show_stratagem_arrows"] = bool(config.get_value("practice", "show_stratagem_arrows", DEFAULT_SHOW_STRATAGEM_ARROWS))
+	return data
+
+
+static func save_practice_config(
+	selected_strat_ids: Array[String],
+	randomize_mode: bool,
+	audio_volume: float = DEFAULT_AUDIO_VOLUME,
+	show_stratagem_arrows: bool = DEFAULT_SHOW_STRATAGEM_ARROWS
+) -> int:
+	var config := ConfigFile.new()
+	config.set_value("practice", "selected_strat_ids", selected_strat_ids)
+	config.set_value("practice", "randomize_mode", randomize_mode)
+	config.set_value("practice", "audio_volume", clampf(audio_volume, 0.0, 1.0))
+	config.set_value("practice", "show_stratagem_arrows", show_stratagem_arrows)
+	return config.save(PRACTICE_CONFIG_PATH)
+
+
+static func get_trainable_strat_ids(strat_ids: Array[String]) -> Array[String]:
+	var trainable_ids: Array[String] = []
+	for strat_id in strat_ids:
+		if STRATAGEMS.has(strat_id) and not STRATAGEMS[strat_id]["sequence"].is_empty():
+			trainable_ids.append(strat_id)
+	return trainable_ids
+
+
+static func scale_volume_db(base_db: float, audio_volume: float) -> float:
+	var scaled_linear := db_to_linear(base_db) * clampf(audio_volume, 0.0, 1.0)
+	if scaled_linear <= 0.0001:
+		return -80.0
+	return linear_to_db(scaled_linear)

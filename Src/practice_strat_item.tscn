@@ -1,0 +1,55 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Src/practice_strat_item.gd" id="1_0j5ay"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_h7a4e"]
+bg_color = Color(0.0901961, 0.117647, 0.156863, 0.86)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 1, 1, 0.1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+content_margin_left = 10.0
+content_margin_top = 10.0
+content_margin_right = 10.0
+content_margin_bottom = 10.0
+
+[node name="PracticeStratItem" type="PanelContainer"]
+theme_override_styles/panel = SubResource("StyleBoxFlat_h7a4e")
+script = ExtResource("1_0j5ay")
+
+[node name="Content" type="HBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="StratIcon" type="TextureRect" parent="Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(44, 44)
+layout_mode = 2
+expand_mode = 1
+
+[node name="Body" type="VBoxContainer" parent="Content"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="StratName" type="Label" parent="Content/Body"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 17
+
+[node name="StratCodes" type="HBoxContainer" parent="Content/Body"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="RemoveBtn" type="Button" parent="Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(88, 36)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Remove"

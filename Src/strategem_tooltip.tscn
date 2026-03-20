@@ -29,3 +29,4 @@ script = ExtResource("1_6ptar")
 unique_name_in_owner = true
 layout_mode = 2
 mouse_filter = 2
+preview_mode = true

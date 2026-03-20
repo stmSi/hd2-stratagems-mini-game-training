@@ -2,17 +2,177 @@
 
 [ext_resource type="Script" uid="uid://c4sx8psy7a328" path="res://Src/train.gd" id="1_bju55"]
 [ext_resource type="PackedScene" uid="uid://b6bpqdoqlpgl1" path="res://Src/strategem_box.tscn" id="2_lomod"]
+[ext_resource type="AudioStream" path="res://Assets/audio/tick_002.ogg" id="3_f0m2x"]
+[ext_resource type="AudioStream" path="res://Assets/audio/error_006.ogg" id="4_tk4v8"]
+[ext_resource type="AudioStream" path="res://Assets/audio/confirmation_003.ogg" id="5_tl0f4"]
 
-[node name="Train" type="Node" unique_id=2123296018]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_oqvtn"]
+bg_color = Color(0.207843, 0.658824, 0.729412, 0.14)
+corner_radius_top_left = 999
+corner_radius_top_right = 999
+corner_radius_bottom_right = 999
+corner_radius_bottom_left = 999
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_grfd0"]
+bg_color = Color(0.988235, 0.760784, 0.4, 0.11)
+corner_radius_top_left = 999
+corner_radius_top_right = 999
+corner_radius_bottom_right = 999
+corner_radius_bottom_left = 999
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_h1qsu"]
+bg_color = Color(0.152941, 0.478431, 0.419608, 0.08)
+corner_radius_top_left = 28
+corner_radius_top_right = 28
+corner_radius_bottom_right = 28
+corner_radius_bottom_left = 28
+
+[node name="Train" type="Control" unique_id=2123296018]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("1_bju55")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1220690916]
-anchors_preset = 4
-anchor_top = 0.5
-anchor_bottom = 0.5
-offset_top = -92.0
-offset_right = 403.0
-offset_bottom = 92.0
+[node name="Backdrop" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 
-[node name="StrategemBox" parent="." unique_id=1231085371 instance=ExtResource("2_lomod")]
+[node name="BaseFill" type="ColorRect" parent="Backdrop"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.0235294, 0.0431373, 0.0666667, 1)
+
+[node name="LeftGlow" type="Panel" parent="Backdrop"]
+offset_left = -160.0
+offset_top = 120.0
+offset_right = 460.0
+offset_bottom = 740.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_grfd0")
+
+[node name="RightGlow" type="Panel" parent="Backdrop"]
+offset_left = 960.0
+offset_top = 300.0
+offset_right = 1600.0
+offset_bottom = 940.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_oqvtn")
+
+[node name="StatusBand" type="Panel" parent="Backdrop"]
+offset_left = 320.0
+offset_top = 214.0
+offset_right = 960.0
+offset_bottom = 350.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_h1qsu")
+
+[node name="HeaderLine" type="ColorRect" parent="Backdrop"]
+offset_left = 42.0
+offset_top = 102.0
+offset_right = 1180.0
+offset_bottom = 104.0
+mouse_filter = 2
+color = Color(1, 1, 1, 0.08)
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 24
+
+[node name="Header" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="BackBtn" type="Button" parent="MarginContainer/VBoxContainer/Header"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(120, 48)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Back"
+
+[node name="HeaderSpacer" type="Control" parent="MarginContainer/VBoxContainer/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ShowArrowsToggle" type="CheckButton" parent="MarginContainer/VBoxContainer/Header"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+button_pressed = true
+text = "Show Strategem Arrows"
+
+[node name="ModeLabel" type="Label" parent="MarginContainer/VBoxContainer/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Mode"
+
+[node name="CenterContainer" type="CenterContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Body" type="VBoxContainer" parent="MarginContainer/VBoxContainer/CenterContainer"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 20
+
+[node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer/CenterContainer/Body"]
+layout_mode = 2
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 42
+text = "Stratagem Training"
+
+[node name="HintLabel" type="Label" parent="MarginContainer/VBoxContainer/CenterContainer/Body"]
+unique_name_in_owner = true
+layout_mode = 2
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 20
+text = "Use WASD or Arrow Keys"
+
+[node name="StrategemBox" parent="MarginContainer/VBoxContainer/CenterContainer/Body" unique_id=1231085371 instance=ExtResource("2_lomod")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="StatusLabel" type="Label" parent="MarginContainer/VBoxContainer/CenterContainer/Body"]
+unique_name_in_owner = true
+layout_mode = 2
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 24
+text = "Type the sequence."
+
+[node name="CorrectSfx" type="AudioStreamPlayer" parent="."]
+unique_name_in_owner = true
+stream = ExtResource("3_f0m2x")
+
+[node name="FailSfx" type="AudioStreamPlayer" parent="."]
+unique_name_in_owner = true
+stream = ExtResource("4_tk4v8")
+
+[node name="SuccessSfx" type="AudioStreamPlayer" parent="."]
+unique_name_in_owner = true
+stream = ExtResource("5_tl0f4")

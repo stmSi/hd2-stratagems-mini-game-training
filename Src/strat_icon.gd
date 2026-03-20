@@ -5,6 +5,8 @@ const TOOLTIP_OFFSET := Vector2(18, 18)
 
 @export var strat_id := ""
 var tooltip_instance: Control
+var is_selected := false
+var show_stratagem_arrows := Global.DEFAULT_SHOW_STRATAGEM_ARROWS
 
 func _ready() -> void:
 	mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
@@ -12,6 +14,7 @@ func _ready() -> void:
 	mouse_exited.connect(_on_mouse_exited)
 	set_process(false)
 	_apply_stratagem_data()
+	_apply_selected_state()
 
 
 func set_stratagem(next_strat_id: String) -> void:
@@ -19,6 +22,18 @@ func set_stratagem(next_strat_id: String) -> void:
 	_apply_stratagem_data()
 	if tooltip_instance and Global.STRATAGEMS.has(strat_id):
 		tooltip_instance.set_strategem(strat_id, Global.STRATAGEMS[strat_id])
+		_update_tooltip_position()
+
+
+func set_selected(value: bool) -> void:
+	is_selected = value
+	_apply_selected_state()
+
+
+func set_show_stratagem_arrows(value: bool) -> void:
+	show_stratagem_arrows = value
+	if tooltip_instance:
+		tooltip_instance.set_show_sequence(show_stratagem_arrows)
 		_update_tooltip_position()
 
 
@@ -39,6 +54,13 @@ func _apply_stratagem_data() -> void:
 	tooltip_text = ""
 
 
+func _apply_selected_state() -> void:
+	if is_selected:
+		self_modulate = Color(1.0, 0.92, 0.65, 1.0)
+	else:
+		self_modulate = Color(1.0, 1.0, 1.0, 1.0)
+
+
 func _process(_delta: float) -> void:
 	_update_tooltip_position()
 
@@ -52,8 +74,9 @@ func _on_mouse_entered() -> void:
 	
 	
 	tooltip_instance.set_strategem(strat_id, Global.STRATAGEMS[strat_id])
+	tooltip_instance.set_show_sequence(show_stratagem_arrows)
 	tooltip_instance.top_level = true
-	get_tree().root.add_child(tooltip_instance)
+	get_window().add_child(tooltip_instance)
 	tooltip_instance.reset_size()
 	_update_tooltip_position()
 	set_process(true)
@@ -79,9 +102,11 @@ func _update_tooltip_position() -> void:
 	var tooltip_size := tooltip_instance.size
 	if tooltip_size == Vector2.ZERO:
 		tooltip_size = tooltip_instance.get_combined_minimum_size()
+	tooltip_size *= tooltip_instance.scale.abs()
 
-	var viewport_size := get_viewport_rect().size
-	var mouse_pos := get_viewport().get_mouse_position()
+	var window_rect := get_window().get_visible_rect()
+	var viewport_size := window_rect.size
+	var mouse_pos := get_window().get_mouse_position()
 	var next_position := mouse_pos + TOOLTIP_OFFSET
 
 	if next_position.x + tooltip_size.x > viewport_size.x:
@@ -91,7 +116,7 @@ func _update_tooltip_position() -> void:
 
 	next_position.x = clampf(next_position.x, 0.0, maxf(0.0, viewport_size.x - tooltip_size.x))
 	next_position.y = clampf(next_position.y, 0.0, maxf(0.0, viewport_size.y - tooltip_size.y))
-	tooltip_instance.position = next_position
+	tooltip_instance.global_position = window_rect.position + next_position
 
 
 func _exit_tree() -> void:
@@ -99,6 +124,4 @@ func _exit_tree() -> void:
 
 
 func _on_gui_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.is_pressed():
-		if event.button_index == MOUSE_BUTTON_LEFT:
-			print('hello')
+	pass
