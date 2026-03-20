@@ -2,6 +2,10 @@
 
 Practice/Training Mini-game for practicing Helldivers 2 stratagem input sequences in Godot.
 
+## Play Online
+
+https://stmsi.github.io/hd2-stratagems-mini-game-training/
+
 ## Screenshots
 
 ### Main Screen
