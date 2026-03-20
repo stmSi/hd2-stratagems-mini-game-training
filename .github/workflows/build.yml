@@ -12,6 +12,8 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 env:
   GODOT_VERSION: "4.6.1"
@@ -83,6 +85,16 @@ jobs:
           "$GODOT_BIN" --headless --path "$GITHUB_WORKSPACE" --export-release "Linux" "$GITHUB_WORKSPACE/build/linux/hd2-strategem-mini-game.x86_64"
           "$GODOT_BIN" --headless --path "$GITHUB_WORKSPACE" --export-release "Web" "$GITHUB_WORKSPACE/build/web/index.html"
 
+      - name: Configure GitHub Pages
+        if: (github.event_name == 'workflow_dispatch' || github.event_name == 'push') && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+        uses: actions/configure-pages@v5
+
+      - name: Upload GitHub Pages artifact
+        if: (github.event_name == 'workflow_dispatch' || github.event_name == 'push') && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: build/web
+
       - name: Package artifacts
         shell: bash
         run: |
@@ -129,3 +141,16 @@ jobs:
               --generate-notes \
               --verify-tag
           fi
+
+  deploy-pages:
+    if: (github.event_name == 'workflow_dispatch' || github.event_name == 'push') && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    runs-on: ubuntu-latest
+    needs: export
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
