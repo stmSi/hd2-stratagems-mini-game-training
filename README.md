@@ -2,6 +2,16 @@
 
 Practice/Training Mini-game for practicing Helldivers 2 stratagem input sequences in Godot.
 
+## Screenshots
+
+### Main Screen
+
+![Main Screen](Home_Main_Screen.png)
+
+### Train Screen
+
+![Train Screen](Train_Screen.png)
+
 ## Credits / Sources
 
 ### SVG icon source
