@@ -7,6 +7,50 @@ const MAIN_SCENE_PATH = "res://Src/main.tscn"
 const TRAIN_SCENE_PATH = "res://Src/train.tscn"
 const DEFAULT_AUDIO_VOLUME = 0.7
 const DEFAULT_SHOW_STRATAGEM_ARROWS = true
+const DEFAULT_REQUIRE_HOLD = false
+const DEFAULT_HOLD_BINDING = {
+	"type": "mouse_button",
+	"button_index": MOUSE_BUTTON_MIDDLE,
+}
+const DEFAULT_DIRECTION_BINDINGS = {
+	"up_primary": {"type": "key", "keycode": KEY_W},
+	"left_primary": {"type": "key", "keycode": KEY_A},
+	"down_primary": {"type": "key", "keycode": KEY_S},
+	"right_primary": {"type": "key", "keycode": KEY_D},
+	"up_secondary": {"type": "key", "keycode": KEY_UP},
+	"left_secondary": {"type": "key", "keycode": KEY_LEFT},
+	"down_secondary": {"type": "key", "keycode": KEY_DOWN},
+	"right_secondary": {"type": "key", "keycode": KEY_RIGHT},
+}
+const DIRECTION_BINDING_SLOT_ORDER = [
+	"up_primary",
+	"up_secondary",
+	"left_primary",
+	"left_secondary",
+	"down_primary",
+	"down_secondary",
+	"right_primary",
+	"right_secondary",
+]
+const DIRECTION_BINDING_ARROW_MAP = {
+	"up_primary": ARROW.UP,
+	"up_secondary": ARROW.UP,
+	"left_primary": ARROW.LEFT,
+	"left_secondary": ARROW.LEFT,
+	"down_primary": ARROW.DOWN,
+	"down_secondary": ARROW.DOWN,
+	"right_primary": ARROW.RIGHT,
+	"right_secondary": ARROW.RIGHT,
+}
+const PRIMARY_DIRECTION_BINDING_SLOTS = ["up_primary", "left_primary", "down_primary", "right_primary"]
+const SECONDARY_DIRECTION_BINDING_SLOTS = ["up_secondary", "left_secondary", "down_secondary", "right_secondary"]
+const MOUSE_BUTTON_LABELS = {
+	MOUSE_BUTTON_LEFT: "Left Mouse",
+	MOUSE_BUTTON_RIGHT: "Right Mouse",
+	MOUSE_BUTTON_MIDDLE: "Middle Mouse",
+	MOUSE_BUTTON_XBUTTON1: "Mouse 4",
+	MOUSE_BUTTON_XBUTTON2: "Mouse 5",
+}
 
 const STRATAGEM_CATEGORY_ORDER = ["priority", "orbital", "eagle", "support", "defensive", "mission"]
 const STRATAGEM_CATEGORY_LABELS = {
@@ -684,6 +728,9 @@ static func load_practice_config() -> Dictionary:
 		"randomize_mode": false,
 		"audio_volume": DEFAULT_AUDIO_VOLUME,
 		"show_stratagem_arrows": DEFAULT_SHOW_STRATAGEM_ARROWS,
+		"require_holding": DEFAULT_REQUIRE_HOLD,
+		"hold_binding": get_default_hold_binding(),
+		"direction_bindings": get_default_direction_bindings(),
 	}
 
 	if config.load(PRACTICE_CONFIG_PATH) != OK:
@@ -700,6 +747,15 @@ static func load_practice_config() -> Dictionary:
 	data["randomize_mode"] = bool(config.get_value("practice", "randomize_mode", false))
 	data["audio_volume"] = clampf(float(config.get_value("practice", "audio_volume", DEFAULT_AUDIO_VOLUME)), 0.0, 1.0)
 	data["show_stratagem_arrows"] = bool(config.get_value("practice", "show_stratagem_arrows", DEFAULT_SHOW_STRATAGEM_ARROWS))
+	data["require_holding"] = bool(config.get_value("practice", "require_holding", DEFAULT_REQUIRE_HOLD))
+	data["hold_binding"] = sanitize_input_binding(
+		config.get_value("practice", "hold_binding", get_default_hold_binding()),
+		get_default_hold_binding(),
+		true
+	)
+	data["direction_bindings"] = sanitize_direction_bindings(
+		config.get_value("practice", "direction_bindings", get_default_direction_bindings())
+	)
 	return data
 
 
@@ -707,13 +763,19 @@ static func save_practice_config(
 	selected_strat_ids: Array[String],
 	randomize_mode: bool,
 	audio_volume: float = DEFAULT_AUDIO_VOLUME,
-	show_stratagem_arrows: bool = DEFAULT_SHOW_STRATAGEM_ARROWS
+	show_stratagem_arrows: bool = DEFAULT_SHOW_STRATAGEM_ARROWS,
+	require_holding: bool = DEFAULT_REQUIRE_HOLD,
+	hold_binding: Dictionary = DEFAULT_HOLD_BINDING,
+	direction_bindings: Dictionary = DEFAULT_DIRECTION_BINDINGS
 ) -> int:
 	var config := ConfigFile.new()
 	config.set_value("practice", "selected_strat_ids", selected_strat_ids)
 	config.set_value("practice", "randomize_mode", randomize_mode)
 	config.set_value("practice", "audio_volume", clampf(audio_volume, 0.0, 1.0))
 	config.set_value("practice", "show_stratagem_arrows", show_stratagem_arrows)
+	config.set_value("practice", "require_holding", require_holding)
+	config.set_value("practice", "hold_binding", sanitize_input_binding(hold_binding, get_default_hold_binding(), true))
+	config.set_value("practice", "direction_bindings", sanitize_direction_bindings(direction_bindings))
 	return config.save(PRACTICE_CONFIG_PATH)
 
 
@@ -730,3 +792,123 @@ static func scale_volume_db(base_db: float, audio_volume: float) -> float:
 	if scaled_linear <= 0.0001:
 		return -80.0
 	return linear_to_db(scaled_linear)
+
+
+static func get_default_hold_binding() -> Dictionary:
+	return DEFAULT_HOLD_BINDING.duplicate(true)
+
+
+static func get_default_direction_bindings() -> Dictionary:
+	return DEFAULT_DIRECTION_BINDINGS.duplicate(true)
+
+
+static func sanitize_direction_bindings(raw_value: Variant) -> Dictionary:
+	var sanitized := get_default_direction_bindings()
+	if raw_value is not Dictionary:
+		return sanitized
+
+	var raw_bindings := raw_value as Dictionary
+	for slot_id in DIRECTION_BINDING_SLOT_ORDER:
+		sanitized[slot_id] = sanitize_input_binding(
+			raw_bindings.get(slot_id, sanitized[slot_id]),
+			DEFAULT_DIRECTION_BINDINGS[slot_id],
+			false
+		)
+	return sanitized
+
+
+static func sanitize_input_binding(raw_value: Variant, fallback_binding: Dictionary, allow_mouse := false) -> Dictionary:
+	var fallback := fallback_binding.duplicate(true)
+	if raw_value is not Dictionary:
+		return fallback
+
+	var raw_binding := raw_value as Dictionary
+	var binding_type := str(raw_binding.get("type", ""))
+	if binding_type == "key":
+		var keycode := int(raw_binding.get("keycode", KEY_NONE))
+		if keycode != KEY_NONE:
+			return {
+				"type": "key",
+				"keycode": keycode,
+			}
+	elif binding_type == "mouse_button" and allow_mouse:
+		var button_index := int(raw_binding.get("button_index", 0))
+		if is_supported_mouse_button(button_index):
+			return {
+				"type": "mouse_button",
+				"button_index": button_index,
+			}
+
+	return fallback
+
+
+static func binding_from_key_event(event: InputEventKey) -> Dictionary:
+	return {
+		"type": "key",
+		"keycode": int(event.keycode),
+	}
+
+
+static func binding_from_mouse_button_event(event: InputEventMouseButton) -> Dictionary:
+	return {
+		"type": "mouse_button",
+		"button_index": int(event.button_index),
+	}
+
+
+static func binding_matches_event(binding: Dictionary, event: InputEvent) -> bool:
+	var binding_type := str(binding.get("type", ""))
+	if binding_type == "key" and event is InputEventKey:
+		return int(binding.get("keycode", KEY_NONE)) == int((event as InputEventKey).keycode)
+	if binding_type == "mouse_button" and event is InputEventMouseButton:
+		return int(binding.get("button_index", 0)) == int((event as InputEventMouseButton).button_index)
+	return false
+
+
+static func is_binding_pressed(binding: Dictionary) -> bool:
+	var binding_type := str(binding.get("type", ""))
+	if binding_type == "key":
+		return Input.is_key_pressed(int(binding.get("keycode", KEY_NONE)))
+	if binding_type == "mouse_button":
+		return Input.is_mouse_button_pressed(int(binding.get("button_index", 0)))
+	return false
+
+
+static func get_binding_label(binding: Dictionary) -> String:
+	var binding_type := str(binding.get("type", ""))
+	if binding_type == "mouse_button":
+		return MOUSE_BUTTON_LABELS.get(int(binding.get("button_index", 0)), "Mouse")
+
+	var keycode := int(binding.get("keycode", KEY_NONE))
+	if keycode == KEY_NONE:
+		return "Unbound"
+	return OS.get_keycode_string(keycode)
+
+
+static func get_direction_binding_summary(direction_bindings: Dictionary) -> String:
+	var primary := get_binding_slot_group_label(direction_bindings, PRIMARY_DIRECTION_BINDING_SLOTS)
+	var secondary := get_binding_slot_group_label(direction_bindings, SECONDARY_DIRECTION_BINDING_SLOTS)
+	if secondary.is_empty():
+		return primary
+	if primary == secondary:
+		return primary
+	return "%s or %s" % [primary, secondary]
+
+
+static func get_binding_slot_group_label(direction_bindings: Dictionary, slot_ids: Array) -> String:
+	var labels: Array[String] = []
+	for slot_id in slot_ids:
+		labels.append(get_binding_label(direction_bindings.get(slot_id, DEFAULT_DIRECTION_BINDINGS[slot_id])))
+	return "/".join(labels)
+
+
+static func get_arrow_for_direction_event(event: InputEvent, direction_bindings: Dictionary) -> int:
+	for slot_id in DIRECTION_BINDING_SLOT_ORDER:
+		var binding: Dictionary = direction_bindings.get(slot_id, DEFAULT_DIRECTION_BINDINGS[slot_id])
+		if binding_matches_event(binding, event):
+			return DIRECTION_BINDING_ARROW_MAP[slot_id]
+	return -1
+
+
+static func is_supported_mouse_button(button_index: int) -> bool:
+	return MOUSE_BUTTON_LABELS.has(button_index)

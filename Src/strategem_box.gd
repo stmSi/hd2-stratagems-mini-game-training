@@ -120,6 +120,16 @@ func pulse_success() -> void:
 	tween.tween_property(self, "scale", base_scale, 0.12)
 
 
+func pulse_hold_ready() -> void:
+	var tween := create_tween()
+	tween.set_parallel(false)
+	tween.set_trans(Tween.TRANS_BACK)
+	tween.set_ease(Tween.EASE_OUT)
+	tween.tween_property(self, "scale", base_scale * 1.03, 0.08)
+	tween.set_trans(Tween.TRANS_SINE)
+	tween.tween_property(self, "scale", base_scale, 0.12)
+
+
 func _clear_codes() -> void:
 	arrow_icons.clear()
 	for child in strategem_codes.get_children():

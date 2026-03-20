@@ -7,9 +7,11 @@ const SUCCESS_SFX_BASE_DB := -3.0
 
 @onready var back_btn: Button = %BackBtn
 @onready var show_arrows_toggle: CheckButton = %ShowArrowsToggle
+@onready var require_holding_toggle: CheckButton = %RequireHoldingToggle
 @onready var mode_label: Label = %ModeLabel
 @onready var status_label: Label = %StatusLabel
 @onready var hint_label: Label = %HintLabel
+@onready var hold_state_label: Label = %HoldStateLabel
 @onready var strategem_box = %StrategemBox
 @onready var correct_sfx: AudioStreamPlayer = %CorrectSfx
 @onready var fail_sfx: AudioStreamPlayer = %FailSfx
@@ -22,32 +24,45 @@ var current_sequence: Array = []
 var randomize_mode := false
 var audio_volume := GLOBAL_DATA.DEFAULT_AUDIO_VOLUME
 var show_stratagem_arrows := GLOBAL_DATA.DEFAULT_SHOW_STRATAGEM_ARROWS
+var require_holding := GLOBAL_DATA.DEFAULT_REQUIRE_HOLD
+var hold_binding: Dictionary = GLOBAL_DATA.get_default_hold_binding()
+var direction_bindings: Dictionary = GLOBAL_DATA.get_default_direction_bindings()
 var sequence_index := 0
 var queue_index := 0
 var input_locked := false
+var hold_feedback_active := false
+var hold_state_base_scale := Vector2.ONE
 var rng := RandomNumberGenerator.new()
 
 
 func _ready() -> void:
 	rng.randomize()
+	hold_state_base_scale = hold_state_label.scale
 	back_btn.focus_mode = Control.FOCUS_NONE
 	back_btn.pressed.connect(_on_back_pressed)
 	_load_config()
 	show_arrows_toggle.button_pressed = show_stratagem_arrows
+	require_holding_toggle.button_pressed = require_holding
 	show_arrows_toggle.toggled.connect(_on_show_arrows_toggled)
+	require_holding_toggle.toggled.connect(_on_require_holding_toggled)
 	_configure_audio_players()
 	_update_mode_label()
 	_apply_show_arrows_setting()
-
-	hint_label.text = "Use WASD or Arrow Keys  |  Press Esc to go back"
+	_update_controls_hint()
+	_refresh_hold_feedback(true)
 	if trainable_strat_ids.is_empty():
 		strategem_box.visible = false
+		hold_state_label.visible = false
 		status_label.text = "No trainable stratagems selected."
 		hint_label.text = "Return to the main screen and add at least one stratagem."
 		return
 
 	strategem_box.visible = true
 	_load_next_stratagem()
+
+
+func _process(_delta: float) -> void:
+	_refresh_hold_feedback()
 
 
 func _input(event: InputEvent) -> void:
@@ -66,8 +81,11 @@ func _input(event: InputEvent) -> void:
 	if input_locked or current_sequence.is_empty():
 		return
 
-	var input_arrow := _map_key_to_arrow(key_event)
+	var input_arrow := GLOBAL_DATA.get_arrow_for_direction_event(key_event, direction_bindings)
 	if input_arrow == -1:
+		return
+
+	if require_holding and not GLOBAL_DATA.is_binding_pressed(hold_binding):
 		return
 
 	get_viewport().set_input_as_handled()
@@ -80,6 +98,9 @@ func _load_config() -> void:
 	randomize_mode = config["randomize_mode"]
 	audio_volume = config["audio_volume"]
 	show_stratagem_arrows = config["show_stratagem_arrows"]
+	require_holding = config["require_holding"]
+	hold_binding = config["hold_binding"]
+	direction_bindings = config["direction_bindings"]
 	trainable_strat_ids = GLOBAL_DATA.get_trainable_strat_ids(selected_strat_ids)
 
 
@@ -97,18 +118,6 @@ func _update_mode_label() -> void:
 		mode_label.text = "Mode: Randomized"
 	else:
 		mode_label.text = "Mode: Queue Order"
-
-
-func _map_key_to_arrow(event: InputEventKey) -> int:
-	if event.physical_keycode == KEY_W or event.keycode == KEY_UP:
-		return Global.ARROW.UP
-	if event.physical_keycode == KEY_A or event.keycode == KEY_LEFT:
-		return Global.ARROW.LEFT
-	if event.physical_keycode == KEY_S or event.keycode == KEY_DOWN:
-		return Global.ARROW.DOWN
-	if event.physical_keycode == KEY_D or event.keycode == KEY_RIGHT:
-		return Global.ARROW.RIGHT
-	return -1
 
 
 func _handle_input_arrow(input_arrow: int) -> void:
@@ -193,6 +202,13 @@ func _on_show_arrows_toggled(toggled_on: bool) -> void:
 	_save_user_config()
 
 
+func _on_require_holding_toggled(toggled_on: bool) -> void:
+	require_holding = toggled_on
+	_update_controls_hint()
+	_refresh_hold_feedback(true)
+	_save_user_config()
+
+
 func _update_progress_status() -> void:
 	status_label.text = "Progress: %d / %d" % [sequence_index, current_sequence.size()]
 
@@ -216,12 +232,61 @@ func _apply_show_arrows_setting() -> void:
 	strategem_box.set_show_sequence(show_stratagem_arrows)
 
 
+func _update_controls_hint() -> void:
+	var hint_text := "Use %s" % GLOBAL_DATA.get_direction_binding_summary(direction_bindings)
+	if require_holding:
+		hint_text += "  |  Hold %s to input" % GLOBAL_DATA.get_binding_label(hold_binding)
+	hint_text += "  |  Press Esc to go back"
+	hint_label.text = hint_text
+
+
+func _refresh_hold_feedback(force := false) -> void:
+	var should_show_feedback := require_holding and not trainable_strat_ids.is_empty()
+	if not should_show_feedback:
+		if force or hold_state_label.visible or hold_feedback_active:
+			hold_feedback_active = false
+			hold_state_label.visible = false
+			hold_state_label.scale = hold_state_base_scale
+			hold_state_label.self_modulate = Color.WHITE
+		return
+
+	var next_active := GLOBAL_DATA.is_binding_pressed(hold_binding)
+	if not force and next_active == hold_feedback_active:
+		return
+
+	hold_feedback_active = next_active
+	hold_state_label.visible = true
+	hold_state_label.scale = hold_state_base_scale
+	if hold_feedback_active:
+		hold_state_label.text = "Hold Active  |  Input Ready"
+		hold_state_label.self_modulate = Color(0.72, 1.0, 0.8, 1.0)
+		if not force:
+			_pulse_hold_feedback()
+	else:
+		hold_state_label.text = "Hold %s to input" % GLOBAL_DATA.get_binding_label(hold_binding)
+		hold_state_label.self_modulate = Color(1.0, 0.88, 0.62, 0.92)
+
+
+func _pulse_hold_feedback() -> void:
+	strategem_box.pulse_hold_ready()
+	var tween := create_tween()
+	tween.set_parallel(false)
+	tween.set_trans(Tween.TRANS_BACK)
+	tween.set_ease(Tween.EASE_OUT)
+	tween.tween_property(hold_state_label, "scale", hold_state_base_scale * 1.06, 0.08)
+	tween.set_trans(Tween.TRANS_SINE)
+	tween.tween_property(hold_state_label, "scale", hold_state_base_scale, 0.12)
+
+
 func _save_user_config() -> void:
 	var err := GLOBAL_DATA.save_practice_config(
 		selected_strat_ids,
 		randomize_mode,
 		audio_volume,
-		show_stratagem_arrows
+		show_stratagem_arrows,
+		require_holding,
+		hold_binding,
+		direction_bindings
 	)
 	if err != OK:
 		push_warning("Failed to save user config: %s" % err)

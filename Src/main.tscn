@@ -283,6 +283,142 @@ theme_override_font_sizes/font_size = 16
 button_pressed = true
 text = "Show Strategem Arrows"
 
+[node name="RequireHoldingToggle" type="CheckButton" parent="VBoxContainer/RootLayout/HBoxContainer/VBoxContainer/SettingsBody" unique_id=182266501]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Require Holding"
+
+[node name="HoldBindingRow" type="HBoxContainer" parent="VBoxContainer/RootLayout/HBoxContainer/VBoxContainer/SettingsBody" unique_id=198837075]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="HoldBindingLabel" type="Label" parent="VBoxContainer/RootLayout/HBoxContainer/VBoxContainer/SettingsBody/HoldBindingRow" unique_id=145977000]
+custom_minimum_size = Vector2(118, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "Hold Binding"
+
+[node name="HoldBindingBtn" type="Button" parent="VBoxContainer/RootLayout/HBoxContainer/VBoxContainer/SettingsBody/HoldBindingRow" unique_id=194275443]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 15
+text = "Middle Mouse"
+
+[node name="BindingsLabel" type="Label" parent="VBoxContainer/RootLayout/HBoxContainer/VBoxContainer/SettingsBody" unique_id=15299587]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "Directional Bindings"
+
+[node name="BindingsHelpLabel" type="Label" parent="VBoxContainer/RootLayout/HBoxContainer/VBoxContainer/SettingsBody" unique_id=870758529]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.68)
+theme_override_font_sizes/font_size = 13
+autowrap_mode = 2
+text = "Click a binding button, then press a key. Hold binding also accepts mouse buttons."
+
+[node name="BindingsGrid" type="GridContainer" parent="VBoxContainer/RootLayout/HBoxContainer/VBoxContainer/SettingsBody" unique_id=340513347]
+layout_mode = 2
+columns = 3
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 8
+
+[node name="GridBlank" type="Control" parent="VBoxContainer/RootLayout/HBoxContainer/VBoxContainer/SettingsBody/BindingsGrid" unique_id=723090566]
+custom_minimum_size = Vector2(70, 0)
+layout_mode = 2
+
+[node name="PrimaryBindingsLabel" type="Label" parent="VBoxContainer/RootLayout/HBoxContainer/VBoxContainer/SettingsBody/BindingsGrid" unique_id=960591577]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Primary"
+horizontal_alignment = 1
+
+[node name="SecondaryBindingsLabel" type="Label" parent="VBoxContainer/RootLayout/HBoxContainer/VBoxContainer/SettingsBody/BindingsGrid" unique_id=1213727532]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Alternate"
+horizontal_alignment = 1
+
+[node name="UpBindingLabel" type="Label" parent="VBoxContainer/RootLayout/HBoxContainer/VBoxContainer/SettingsBody/BindingsGrid" unique_id=728754969]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "Up"
+
+[node name="UpPrimaryBtn" type="Button" parent="VBoxContainer/RootLayout/HBoxContainer/VBoxContainer/SettingsBody/BindingsGrid" unique_id=221962834]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "W"
+
+[node name="UpSecondaryBtn" type="Button" parent="VBoxContainer/RootLayout/HBoxContainer/VBoxContainer/SettingsBody/BindingsGrid" unique_id=637151849]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "Up"
+
+[node name="LeftBindingLabel" type="Label" parent="VBoxContainer/RootLayout/HBoxContainer/VBoxContainer/SettingsBody/BindingsGrid" unique_id=1440911128]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "Left"
+
+[node name="LeftPrimaryBtn" type="Button" parent="VBoxContainer/RootLayout/HBoxContainer/VBoxContainer/SettingsBody/BindingsGrid" unique_id=1979456327]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "A"
+
+[node name="LeftSecondaryBtn" type="Button" parent="VBoxContainer/RootLayout/HBoxContainer/VBoxContainer/SettingsBody/BindingsGrid" unique_id=419438070]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "Left"
+
+[node name="DownBindingLabel" type="Label" parent="VBoxContainer/RootLayout/HBoxContainer/VBoxContainer/SettingsBody/BindingsGrid" unique_id=272363519]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "Down"
+
+[node name="DownPrimaryBtn" type="Button" parent="VBoxContainer/RootLayout/HBoxContainer/VBoxContainer/SettingsBody/BindingsGrid" unique_id=173419364]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "S"
+
+[node name="DownSecondaryBtn" type="Button" parent="VBoxContainer/RootLayout/HBoxContainer/VBoxContainer/SettingsBody/BindingsGrid" unique_id=903706297]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "Down"
+
+[node name="RightBindingLabel" type="Label" parent="VBoxContainer/RootLayout/HBoxContainer/VBoxContainer/SettingsBody/BindingsGrid" unique_id=955314104]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "Right"
+
+[node name="RightPrimaryBtn" type="Button" parent="VBoxContainer/RootLayout/HBoxContainer/VBoxContainer/SettingsBody/BindingsGrid" unique_id=463151522]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "D"
+
+[node name="RightSecondaryBtn" type="Button" parent="VBoxContainer/RootLayout/HBoxContainer/VBoxContainer/SettingsBody/BindingsGrid" unique_id=304663014]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "Right"
+
 [node name="AudioVolumeRow" type="HBoxContainer" parent="VBoxContainer/RootLayout/HBoxContainer/VBoxContainer/SettingsBody" unique_id=1969350926]
 layout_mode = 2
 theme_override_constants/separation = 10
@@ -308,6 +444,20 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 16
 text = "70%"
 horizontal_alignment = 2
+
+[node name="ResetDefaultsBtn" type="Button" parent="VBoxContainer/RootLayout/HBoxContainer/VBoxContainer/SettingsBody" unique_id=902510266]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "Reset Settings to Default"
+
+[node name="CloseSettingsBtn" type="Button" parent="VBoxContainer/RootLayout/HBoxContainer/VBoxContainer/SettingsBody" unique_id=507263115]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "Close Settings"
 
 [node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/RootLayout/HBoxContainer/VBoxContainer" unique_id=434436020]
 layout_mode = 2
