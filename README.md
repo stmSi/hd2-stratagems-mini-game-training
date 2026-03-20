@@ -1,4 +1,4 @@
-# hd2-strategem-mini-game
+# Helldivers 2 Strategem Mini Game
 
 Practice/Training Mini-game for practicing Helldivers 2 stratagem input sequences in Godot.
 
