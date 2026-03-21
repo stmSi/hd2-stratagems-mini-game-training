@@ -401,8 +401,7 @@ func _update_web_hold_warning() -> void:
 		return
 
 	var is_ctrl_hold := (
-		require_holding
-		and str(hold_binding.get("type", "")) == "key"
+		str(hold_binding.get("type", "")) == "key"
 		and int(hold_binding.get("keycode", KEY_NONE)) == KEY_CTRL
 	)
 	web_hold_warning_label.visible = is_ctrl_hold
