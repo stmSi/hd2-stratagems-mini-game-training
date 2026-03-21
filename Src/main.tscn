@@ -241,10 +241,10 @@ horizontal_scroll_mode = 0
 [node name="ListOfStratsPadding" type="MarginContainer" parent="VBoxContainer/RootLayout/HBoxContainer/ListOfStratsScroll"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/margin_left = 14
-theme_override_constants/margin_top = 14
-theme_override_constants/margin_right = 14
-theme_override_constants/margin_bottom = 14
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 22
+theme_override_constants/margin_bottom = 18
 
 [node name="ListOfStrats" type="VBoxContainer" parent="VBoxContainer/RootLayout/HBoxContainer/ListOfStratsScroll/ListOfStratsPadding" unique_id=2020804752]
 unique_name_in_owner = true
