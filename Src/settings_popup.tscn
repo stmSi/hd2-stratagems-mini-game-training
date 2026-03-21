@@ -1,0 +1,377 @@
+[gd_scene format=3 uid="uid://clk2lfsf3pk8x"]
+
+[ext_resource type="Script" uid="uid://c4mfu0xuv84ip" path="res://Src/settings_popup.gd" id="1_q6jfh"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qevp4"]
+content_margin_left = 28.0
+content_margin_top = 28.0
+content_margin_right = 28.0
+content_margin_bottom = 28.0
+bg_color = Color(0.054902, 0.0745098, 0.105882, 0.98)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 0.87451, 0.607843, 0.22)
+corner_radius_top_left = 24
+corner_radius_top_right = 24
+corner_radius_bottom_right = 24
+corner_radius_bottom_left = 24
+shadow_color = Color(0, 0, 0, 0.44)
+shadow_size = 18
+
+[node name="SettingsPopup" type="Control" unique_id=2003078501]
+visible = false
+z_index = 20
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+script = ExtResource("1_q6jfh")
+
+[node name="OverlayDim" type="ColorRect" parent="." unique_id=826833106]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.0117647, 0.0196078, 0.0313726, 0.74)
+
+[node name="DismissBtn" type="Button" parent="." unique_id=2125573696]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+flat = true
+
+[node name="CenterContainer" type="CenterContainer" parent="." unique_id=1498051284]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="CenterContainer" unique_id=1535855698]
+custom_minimum_size = Vector2(980, 0)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_qevp4")
+
+[node name="MarginContainer" type="MarginContainer" parent="CenterContainer/PanelContainer" unique_id=2139229762]
+layout_mode = 2
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_top = 30
+theme_override_constants/margin_right = 30
+theme_override_constants/margin_bottom = 30
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer" unique_id=1508767374]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="Header" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=1511943980]
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Header" unique_id=686615061]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 34
+text = "Settings"
+
+[node name="CloseBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/Header" unique_id=1799085635]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(112, 44)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Close"
+
+[node name="SettingsTabs" type="TabContainer" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer" unique_id=1338932133]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 560)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_font_sizes/font_size = 18
+current_tab = 0
+
+[node name="GeneralTab" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsTabs" unique_id=574556170]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 14
+metadata/_tab_index = 0
+
+[node name="RandomizeToggle" type="CheckButton" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsTabs/GeneralTab" unique_id=156804365]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+theme_override_font_sizes/font_size = 19
+text = "Randomize Order"
+
+[node name="ShowArrowsToggle" type="CheckButton" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsTabs/GeneralTab" unique_id=952202574]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+theme_override_font_sizes/font_size = 19
+text = "Show Strategem Arrows"
+
+[node name="RequireHoldingToggle" type="CheckButton" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsTabs/GeneralTab" unique_id=393825112]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+theme_override_font_sizes/font_size = 19
+text = "Require Holding"
+
+[node name="AudioVolumeRow" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsTabs/GeneralTab" unique_id=1295621128]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="AudioVolumeLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsTabs/GeneralTab/AudioVolumeRow" unique_id=1738288414]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Volume"
+
+[node name="AudioVolumeSlider" type="HSlider" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsTabs/GeneralTab/AudioVolumeRow" unique_id=313697581]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+size_flags_horizontal = 3
+value = 70.0
+
+[node name="AudioVolumeValueLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsTabs/GeneralTab/AudioVolumeRow" unique_id=8591793]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(56, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "70%"
+horizontal_alignment = 2
+
+[node name="ResetDefaultsBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsTabs/GeneralTab" unique_id=85292915]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Reset Settings to Default"
+
+[node name="KeyboardTab" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsTabs" unique_id=1408480921]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 14
+metadata/_tab_index = 1
+
+[node name="HoldBindingRow" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsTabs/KeyboardTab" unique_id=2061931629]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="HoldBindingLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsTabs/KeyboardTab/HoldBindingRow" unique_id=1130014024]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Hold Binding"
+
+[node name="HoldBindingBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsTabs/KeyboardTab/HoldBindingRow" unique_id=1358341333]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 18
+text = "Middle Mouse"
+
+[node name="BindingsHelpLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsTabs/KeyboardTab" unique_id=917243209]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.72)
+theme_override_font_sizes/font_size = 15
+text = "Press a key or mouse button to rebind keyboard inputs."
+autowrap_mode = 2
+
+[node name="BindingsGrid" type="GridContainer" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsTabs/KeyboardTab" unique_id=1238161810]
+layout_mode = 2
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 10
+columns = 3
+
+[node name="GridBlank" type="Control" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsTabs/KeyboardTab/BindingsGrid" unique_id=1476736760]
+custom_minimum_size = Vector2(110, 0)
+layout_mode = 2
+
+[node name="PrimaryBindingsLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsTabs/KeyboardTab/BindingsGrid" unique_id=712451143]
+layout_mode = 2
+theme_override_font_sizes/font_size = 17
+text = "Primary"
+horizontal_alignment = 1
+
+[node name="SecondaryBindingsLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsTabs/KeyboardTab/BindingsGrid" unique_id=1355410441]
+layout_mode = 2
+theme_override_font_sizes/font_size = 17
+text = "Alternate"
+horizontal_alignment = 1
+
+[node name="UpBindingLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsTabs/KeyboardTab/BindingsGrid" unique_id=1192787092]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Up"
+
+[node name="UpPrimaryBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsTabs/KeyboardTab/BindingsGrid" unique_id=1131054079]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "W"
+
+[node name="UpSecondaryBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsTabs/KeyboardTab/BindingsGrid" unique_id=1702039153]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Up"
+
+[node name="LeftBindingLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsTabs/KeyboardTab/BindingsGrid" unique_id=1687420309]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Left"
+
+[node name="LeftPrimaryBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsTabs/KeyboardTab/BindingsGrid" unique_id=1291773932]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "A"
+
+[node name="LeftSecondaryBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsTabs/KeyboardTab/BindingsGrid" unique_id=128216799]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Left"
+
+[node name="DownBindingLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsTabs/KeyboardTab/BindingsGrid" unique_id=176716484]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Down"
+
+[node name="DownPrimaryBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsTabs/KeyboardTab/BindingsGrid" unique_id=1812623364]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "S"
+
+[node name="DownSecondaryBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsTabs/KeyboardTab/BindingsGrid" unique_id=1487307501]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Down"
+
+[node name="RightBindingLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsTabs/KeyboardTab/BindingsGrid" unique_id=1362474560]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Right"
+
+[node name="RightPrimaryBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsTabs/KeyboardTab/BindingsGrid" unique_id=2054887233]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "D"
+
+[node name="RightSecondaryBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsTabs/KeyboardTab/BindingsGrid" unique_id=1075479706]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Right"
+
+[node name="ControllerTab" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsTabs" unique_id=1100883701]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 14
+metadata/_tab_index = 2
+
+[node name="ControllerHintLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsTabs/ControllerTab" unique_id=1072221454]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.72)
+theme_override_font_sizes/font_size = 15
+text = "Controller bindings stay active alongside keyboard bindings."
+autowrap_mode = 2
+
+[node name="ControllerHoldBindingRow" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsTabs/ControllerTab" unique_id=680768753]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="ControllerHoldBindingLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsTabs/ControllerTab/ControllerHoldBindingRow" unique_id=177078436]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Controller Hold"
+
+[node name="ControllerHoldBindingBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsTabs/ControllerTab/ControllerHoldBindingRow" unique_id=1160102259]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 18
+text = "L1 / LB"
+
+[node name="ControllerBindingsGrid" type="GridContainer" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsTabs/ControllerTab" unique_id=265087732]
+layout_mode = 2
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 10
+columns = 2
+
+[node name="ControllerUpLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsTabs/ControllerTab/ControllerBindingsGrid" unique_id=1861392492]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Up"
+
+[node name="ControllerUpBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsTabs/ControllerTab/ControllerBindingsGrid" unique_id=1266738000]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "D-Pad Up"
+
+[node name="ControllerLeftLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsTabs/ControllerTab/ControllerBindingsGrid" unique_id=488251814]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Left"
+
+[node name="ControllerLeftBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsTabs/ControllerTab/ControllerBindingsGrid" unique_id=829786542]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "D-Pad Left"
+
+[node name="ControllerDownLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsTabs/ControllerTab/ControllerBindingsGrid" unique_id=2010235911]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Down"
+
+[node name="ControllerDownBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsTabs/ControllerTab/ControllerBindingsGrid" unique_id=911675759]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "D-Pad Down"
+
+[node name="ControllerRightLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsTabs/ControllerTab/ControllerBindingsGrid" unique_id=648841282]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Right"
+
+[node name="ControllerRightBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsTabs/ControllerTab/ControllerBindingsGrid" unique_id=1164836172]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "D-Pad Right"

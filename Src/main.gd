@@ -3,6 +3,7 @@ extends Node
 const GLOBAL_DATA = preload("res://Src/Global.gd")
 const STRAT_ICON_SCENE = preload("uid://cw23thcgkm5wx")
 const PRACTICE_STRAT_ITEM_SCENE = preload("res://Src/practice_strat_item.tscn")
+const SETTINGS_POPUP_SCENE = preload("res://Src/settings_popup.tscn")
 
 @onready var list_of_strats: VBoxContainer = %ListOfStrats
 @onready var player_strats: VBoxContainer = %PlayerStrats
@@ -10,27 +11,10 @@ const PRACTICE_STRAT_ITEM_SCENE = preload("res://Src/practice_strat_item.tscn")
 @onready var search_clear_btn: Button = %SearchClearBtn
 @onready var github_link_btn: LinkButton = %GithubLinkBtn
 @onready var settings_toggle_btn: Button = %SettingsToggleBtn
-@onready var settings_body: VBoxContainer = %SettingsBody
-@onready var randomize_toggle: CheckButton = %RandomizeToggle
-@onready var show_arrows_toggle: CheckButton = %ShowArrowsToggle
-@onready var require_holding_toggle: CheckButton = %RequireHoldingToggle
-@onready var hold_binding_btn: Button = %HoldBindingBtn
-@onready var bindings_help_label: Label = %BindingsHelpLabel
-@onready var up_primary_btn: Button = %UpPrimaryBtn
-@onready var up_secondary_btn: Button = %UpSecondaryBtn
-@onready var left_primary_btn: Button = %LeftPrimaryBtn
-@onready var left_secondary_btn: Button = %LeftSecondaryBtn
-@onready var down_primary_btn: Button = %DownPrimaryBtn
-@onready var down_secondary_btn: Button = %DownSecondaryBtn
-@onready var right_primary_btn: Button = %RightPrimaryBtn
-@onready var right_secondary_btn: Button = %RightSecondaryBtn
-@onready var audio_volume_slider: HSlider = %AudioVolumeSlider
-@onready var audio_volume_value_label: Label = %AudioVolumeValueLabel
-@onready var reset_defaults_btn: Button = %ResetDefaultsBtn
-@onready var close_settings_btn: Button = %CloseSettingsBtn
 @onready var clear_reset_btn: Button = %ClearResetBtn
 @onready var train_btn: Button = %TrainBtn
 
+var settings_popup: Control
 var user_strat_list: Array[String] = []
 var search_query := ""
 var randomize_mode := false
@@ -39,46 +23,20 @@ var show_stratagem_arrows := GLOBAL_DATA.DEFAULT_SHOW_STRATAGEM_ARROWS
 var require_holding := GLOBAL_DATA.DEFAULT_REQUIRE_HOLD
 var hold_binding: Dictionary = GLOBAL_DATA.get_default_hold_binding()
 var direction_bindings: Dictionary = GLOBAL_DATA.get_default_direction_bindings()
-var binding_buttons := {}
-var pending_binding_slot := ""
-var binding_capture_ready_frame := -1
+var controller_hold_binding: Dictionary = GLOBAL_DATA.get_default_controller_hold_binding()
+var controller_direction_bindings: Dictionary = GLOBAL_DATA.get_default_controller_direction_bindings()
+var practice_stats: Dictionary = {}
+
 
 func _ready() -> void:
-	binding_buttons = {
-		"hold": hold_binding_btn,
-		"up_primary": up_primary_btn,
-		"up_secondary": up_secondary_btn,
-		"left_primary": left_primary_btn,
-		"left_secondary": left_secondary_btn,
-		"down_primary": down_primary_btn,
-		"down_secondary": down_secondary_btn,
-		"right_primary": right_primary_btn,
-		"right_secondary": right_secondary_btn,
-	}
 	_load_user_config()
+	_setup_settings_popup()
 	search_input.text = search_query
-	settings_toggle_btn.button_pressed = false
-	randomize_toggle.button_pressed = randomize_mode
-	show_arrows_toggle.button_pressed = show_stratagem_arrows
-	require_holding_toggle.button_pressed = require_holding
-	audio_volume_slider.value = audio_volume * 100.0
 	_update_search_controls()
-	_update_settings_visibility()
-	_update_volume_controls()
-	_update_binding_controls()
 	search_input.text_changed.connect(_on_search_text_changed)
 	search_clear_btn.pressed.connect(_on_search_clear_pressed)
 	github_link_btn.pressed.connect(_on_github_link_pressed)
-	settings_toggle_btn.toggled.connect(_on_settings_toggled)
-	randomize_toggle.toggled.connect(_on_randomize_toggled)
-	show_arrows_toggle.toggled.connect(_on_show_arrows_toggled)
-	require_holding_toggle.toggled.connect(_on_require_holding_toggled)
-	for slot_id in binding_buttons.keys():
-		var button: Button = binding_buttons[slot_id]
-		button.pressed.connect(_on_binding_capture_requested.bind(slot_id))
-	audio_volume_slider.value_changed.connect(_on_audio_volume_changed)
-	reset_defaults_btn.pressed.connect(_on_reset_defaults_pressed)
-	close_settings_btn.pressed.connect(_on_close_settings_pressed)
+	settings_toggle_btn.pressed.connect(_on_settings_pressed)
 	clear_reset_btn.pressed.connect(_on_clear_saved_pressed)
 	train_btn.pressed.connect(_on_train_pressed)
 	_populate_stratagem_list()
@@ -86,35 +44,54 @@ func _ready() -> void:
 	_update_action_buttons()
 
 
-func _input(event: InputEvent) -> void:
-	if pending_binding_slot.is_empty():
-		return
+func _setup_settings_popup() -> void:
+	settings_popup = SETTINGS_POPUP_SCENE.instantiate()
+	add_child(settings_popup)
+	settings_popup.config_changed.connect(_on_settings_popup_config_changed)
+	settings_popup.popup_closed.connect(_on_settings_popup_closed)
 
-	if Engine.get_process_frames() <= binding_capture_ready_frame:
-		return
 
-	if event is InputEventKey:
-		var key_event := event as InputEventKey
-		if not key_event.pressed or key_event.echo:
-			return
+func _build_settings_config() -> Dictionary:
+	return {
+		"randomize_mode": randomize_mode,
+		"audio_volume": audio_volume,
+		"show_stratagem_arrows": show_stratagem_arrows,
+		"require_holding": require_holding,
+		"hold_binding": hold_binding.duplicate(true),
+		"direction_bindings": direction_bindings.duplicate(true),
+		"controller_hold_binding": controller_hold_binding.duplicate(true),
+		"controller_direction_bindings": controller_direction_bindings.duplicate(true),
+	}
 
-		get_viewport().set_input_as_handled()
-		if key_event.keycode == KEY_ESCAPE:
-			_cancel_binding_capture()
-			return
 
-		_apply_captured_binding(pending_binding_slot, GLOBAL_DATA.binding_from_key_event(key_event))
-		return
+func _apply_settings_config(config: Dictionary) -> void:
+	var previous_show_arrows := show_stratagem_arrows
+	randomize_mode = bool(config.get("randomize_mode", randomize_mode))
+	audio_volume = clampf(float(config.get("audio_volume", audio_volume)), 0.0, 1.0)
+	show_stratagem_arrows = bool(config.get("show_stratagem_arrows", show_stratagem_arrows))
+	require_holding = bool(config.get("require_holding", require_holding))
+	hold_binding = GLOBAL_DATA.sanitize_input_binding(
+		config.get("hold_binding", hold_binding),
+		GLOBAL_DATA.get_default_hold_binding(),
+		true,
+		false
+	)
+	direction_bindings = GLOBAL_DATA.sanitize_direction_bindings(
+		config.get("direction_bindings", direction_bindings)
+	)
+	controller_hold_binding = GLOBAL_DATA.sanitize_input_binding(
+		config.get("controller_hold_binding", controller_hold_binding),
+		GLOBAL_DATA.get_default_controller_hold_binding(),
+		false,
+		true
+	)
+	controller_direction_bindings = GLOBAL_DATA.sanitize_controller_direction_bindings(
+		config.get("controller_direction_bindings", controller_direction_bindings)
+	)
 
-	if pending_binding_slot != "hold" or event is not InputEventMouseButton:
-		return
-
-	var mouse_event := event as InputEventMouseButton
-	if not mouse_event.pressed or not GLOBAL_DATA.is_supported_mouse_button(mouse_event.button_index):
-		return
-
-	get_viewport().set_input_as_handled()
-	_apply_captured_binding(pending_binding_slot, GLOBAL_DATA.binding_from_mouse_button_event(mouse_event))
+	if previous_show_arrows != show_stratagem_arrows:
+		_refresh_saved_stratagems()
+		_populate_stratagem_list()
 
 
 func _populate_stratagem_list() -> void:
@@ -149,7 +126,7 @@ func _add_category_section(category: String, strat_ids: Array) -> void:
 	list_of_strats.add_child(label)
 
 	var grid := GridContainer.new()
-	grid.columns = 7
+	grid.columns = 8
 	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	grid.add_theme_constant_override("h_separation", 15)
 	grid.add_theme_constant_override("v_separation", 15)
@@ -218,6 +195,21 @@ func _on_github_link_pressed() -> void:
 		push_warning("Failed to open GitHub link: %s" % err)
 
 
+func _on_settings_pressed() -> void:
+	if not settings_popup:
+		return
+	settings_popup.open_with_config(_build_settings_config())
+
+
+func _on_settings_popup_config_changed(config: Dictionary) -> void:
+	_apply_settings_config(config)
+	_save_user_config()
+
+
+func _on_settings_popup_closed() -> void:
+	pass
+
+
 func _on_strat_icon_pressed(strat_id: String) -> void:
 	if user_strat_list.has(strat_id):
 		user_strat_list.erase(strat_id)
@@ -252,58 +244,6 @@ func _on_clear_saved_pressed() -> void:
 	_update_action_buttons()
 
 
-func _on_randomize_toggled(toggled_on: bool) -> void:
-	randomize_mode = toggled_on
-	_save_user_config()
-
-
-func _on_settings_toggled(toggled_on: bool) -> void:
-	if not toggled_on:
-		_cancel_binding_capture()
-	settings_body.visible = toggled_on
-	_update_settings_visibility()
-
-
-func _on_show_arrows_toggled(toggled_on: bool) -> void:
-	show_stratagem_arrows = toggled_on
-	_save_user_config()
-	_refresh_saved_stratagems()
-	_populate_stratagem_list()
-
-
-func _on_require_holding_toggled(toggled_on: bool) -> void:
-	require_holding = toggled_on
-	_save_user_config()
-	_update_binding_controls()
-
-
-func _on_audio_volume_changed(value: float) -> void:
-	audio_volume = clampf(value / 100.0, 0.0, 1.0)
-	_update_volume_controls()
-	_save_user_config()
-
-
-func _on_reset_defaults_pressed() -> void:
-	_cancel_binding_capture(false)
-	randomize_mode = false
-	show_stratagem_arrows = GLOBAL_DATA.DEFAULT_SHOW_STRATAGEM_ARROWS
-	require_holding = GLOBAL_DATA.DEFAULT_REQUIRE_HOLD
-	audio_volume = GLOBAL_DATA.DEFAULT_AUDIO_VOLUME
-	hold_binding = GLOBAL_DATA.get_default_hold_binding()
-	direction_bindings = GLOBAL_DATA.get_default_direction_bindings()
-
-	randomize_toggle.set_pressed_no_signal(randomize_mode)
-	show_arrows_toggle.set_pressed_no_signal(show_stratagem_arrows)
-	require_holding_toggle.set_pressed_no_signal(require_holding)
-	audio_volume_slider.set_value_no_signal(audio_volume * 100.0)
-
-	_update_volume_controls()
-	_update_binding_controls()
-	_refresh_saved_stratagems()
-	_populate_stratagem_list()
-	_save_user_config()
-
-
 func _on_train_pressed() -> void:
 	if train_btn.disabled:
 		return
@@ -314,46 +254,8 @@ func _on_train_pressed() -> void:
 		push_warning("Failed to open train scene: %s" % err)
 
 
-func _on_close_settings_pressed() -> void:
-	_cancel_binding_capture(false)
-	settings_toggle_btn.set_pressed_no_signal(false)
-	_update_settings_visibility()
-
-
 func _update_search_controls() -> void:
 	search_clear_btn.disabled = search_query.is_empty()
-
-
-func _update_settings_visibility() -> void:
-	settings_body.visible = settings_toggle_btn.button_pressed
-	if settings_toggle_btn.button_pressed:
-		settings_toggle_btn.text = "Settings -"
-	else:
-		settings_toggle_btn.text = "Settings +"
-
-
-func _update_volume_controls() -> void:
-	audio_volume_value_label.text = "%d%%" % int(round(audio_volume * 100.0))
-
-
-func _update_binding_controls() -> void:
-	require_holding_toggle.text = "Require Holding"
-	hold_binding_btn.text = _get_binding_button_text("hold")
-	up_primary_btn.text = _get_binding_button_text("up_primary")
-	up_secondary_btn.text = _get_binding_button_text("up_secondary")
-	left_primary_btn.text = _get_binding_button_text("left_primary")
-	left_secondary_btn.text = _get_binding_button_text("left_secondary")
-	down_primary_btn.text = _get_binding_button_text("down_primary")
-	down_secondary_btn.text = _get_binding_button_text("down_secondary")
-	right_primary_btn.text = _get_binding_button_text("right_primary")
-	right_secondary_btn.text = _get_binding_button_text("right_secondary")
-
-	if pending_binding_slot.is_empty():
-		bindings_help_label.text = "Click a binding button, then press a key. Hold binding also accepts mouse buttons."
-	elif pending_binding_slot == "hold":
-		bindings_help_label.text = "Press a key or mouse button for hold input. Press Esc to cancel."
-	else:
-		bindings_help_label.text = "Press a key for %s. Press Esc to cancel." % _get_binding_slot_label(pending_binding_slot)
 
 
 func _update_action_buttons() -> void:
@@ -378,6 +280,9 @@ func _load_user_config() -> void:
 	require_holding = config["require_holding"]
 	hold_binding = config["hold_binding"]
 	direction_bindings = config["direction_bindings"]
+	controller_hold_binding = config["controller_hold_binding"]
+	controller_direction_bindings = config["controller_direction_bindings"]
+	practice_stats = config["practice_stats"]
 
 
 func _save_user_config() -> void:
@@ -388,72 +293,10 @@ func _save_user_config() -> void:
 		show_stratagem_arrows,
 		require_holding,
 		hold_binding,
-		direction_bindings
+		direction_bindings,
+		controller_hold_binding,
+		controller_direction_bindings,
+		practice_stats
 	)
 	if err != OK:
 		push_warning("Failed to save user config: %s" % err)
-
-
-func _on_binding_capture_requested(slot_id: String) -> void:
-	if pending_binding_slot == slot_id:
-		_cancel_binding_capture()
-		return
-
-	pending_binding_slot = slot_id
-	binding_capture_ready_frame = Engine.get_process_frames()
-	_update_binding_controls()
-
-
-func _apply_captured_binding(slot_id: String, binding: Dictionary) -> void:
-	if slot_id == "hold":
-		hold_binding = GLOBAL_DATA.sanitize_input_binding(binding, hold_binding, true)
-	else:
-		var fallback: Dictionary = direction_bindings.get(slot_id, GLOBAL_DATA.DEFAULT_DIRECTION_BINDINGS[slot_id])
-		direction_bindings[slot_id] = GLOBAL_DATA.sanitize_input_binding(binding, fallback, false)
-
-	_cancel_binding_capture(false)
-	_save_user_config()
-	_update_binding_controls()
-
-
-func _cancel_binding_capture(refresh_ui := true) -> void:
-	pending_binding_slot = ""
-	binding_capture_ready_frame = -1
-	if refresh_ui:
-		_update_binding_controls()
-
-
-func _get_binding_button_text(slot_id: String) -> String:
-	if pending_binding_slot == slot_id:
-		if slot_id == "hold":
-			return "Press key / mouse..."
-		return "Press key..."
-
-	if slot_id == "hold":
-		return GLOBAL_DATA.get_binding_label(hold_binding)
-
-	return GLOBAL_DATA.get_binding_label(direction_bindings.get(slot_id, GLOBAL_DATA.DEFAULT_DIRECTION_BINDINGS[slot_id]))
-
-
-func _get_binding_slot_label(slot_id: String) -> String:
-	match slot_id:
-		"up_primary":
-			return "Primary Up"
-		"up_secondary":
-			return "Alternate Up"
-		"left_primary":
-			return "Primary Left"
-		"left_secondary":
-			return "Alternate Left"
-		"down_primary":
-			return "Primary Down"
-		"down_secondary":
-			return "Alternate Down"
-		"right_primary":
-			return "Primary Right"
-		"right_secondary":
-			return "Alternate Right"
-		"hold":
-			return "Hold Input"
-		_:
-			return "Binding"

@@ -9,9 +9,14 @@ const GITHUB_REPO_URL = "https://github.com/stmSi/hd2-stratagems-mini-game-train
 const DEFAULT_AUDIO_VOLUME = 0.7
 const DEFAULT_SHOW_STRATAGEM_ARROWS = true
 const DEFAULT_REQUIRE_HOLD = false
+const DEFAULT_CONTROLLER_HOLD_BUTTON := JOY_BUTTON_LEFT_SHOULDER
 const DEFAULT_HOLD_BINDING = {
 	"type": "mouse_button",
 	"button_index": MOUSE_BUTTON_MIDDLE,
+}
+const DEFAULT_CONTROLLER_HOLD_BINDING = {
+	"type": "joy_button",
+	"button_index": DEFAULT_CONTROLLER_HOLD_BUTTON,
 }
 const DEFAULT_DIRECTION_BINDINGS = {
 	"up_primary": {"type": "key", "keycode": KEY_W},
@@ -22,6 +27,12 @@ const DEFAULT_DIRECTION_BINDINGS = {
 	"left_secondary": {"type": "key", "keycode": KEY_LEFT},
 	"down_secondary": {"type": "key", "keycode": KEY_DOWN},
 	"right_secondary": {"type": "key", "keycode": KEY_RIGHT},
+}
+const DEFAULT_CONTROLLER_DIRECTION_BINDINGS = {
+	"up": {"type": "joy_button", "button_index": JOY_BUTTON_DPAD_UP},
+	"left": {"type": "joy_button", "button_index": JOY_BUTTON_DPAD_LEFT},
+	"down": {"type": "joy_button", "button_index": JOY_BUTTON_DPAD_DOWN},
+	"right": {"type": "joy_button", "button_index": JOY_BUTTON_DPAD_RIGHT},
 }
 const DIRECTION_BINDING_SLOT_ORDER = [
 	"up_primary",
@@ -43,6 +54,29 @@ const DIRECTION_BINDING_ARROW_MAP = {
 	"right_primary": ARROW.RIGHT,
 	"right_secondary": ARROW.RIGHT,
 }
+const DEFAULT_CONTROLLER_DIRECTION_BUTTONS = {
+	JOY_BUTTON_DPAD_UP: ARROW.UP,
+	JOY_BUTTON_DPAD_LEFT: ARROW.LEFT,
+	JOY_BUTTON_DPAD_DOWN: ARROW.DOWN,
+	JOY_BUTTON_DPAD_RIGHT: ARROW.RIGHT,
+}
+const CONTROLLER_DIRECTION_BINDING_SLOT_ORDER = ["up", "left", "down", "right"]
+const CONTROLLER_DIRECTION_BINDING_ARROW_MAP = {
+	"up": ARROW.UP,
+	"left": ARROW.LEFT,
+	"down": ARROW.DOWN,
+	"right": ARROW.RIGHT,
+}
+const KEYBOARD_TO_CONTROLLER_DIRECTION_SLOT_MAP = {
+	"up_primary": "up",
+	"up_secondary": "up",
+	"left_primary": "left",
+	"left_secondary": "left",
+	"down_primary": "down",
+	"down_secondary": "down",
+	"right_primary": "right",
+	"right_secondary": "right",
+}
 const PRIMARY_DIRECTION_BINDING_SLOTS = ["up_primary", "left_primary", "down_primary", "right_primary"]
 const SECONDARY_DIRECTION_BINDING_SLOTS = ["up_secondary", "left_secondary", "down_secondary", "right_secondary"]
 const MOUSE_BUTTON_LABELS = {
@@ -51,6 +85,23 @@ const MOUSE_BUTTON_LABELS = {
 	MOUSE_BUTTON_MIDDLE: "Middle Mouse",
 	MOUSE_BUTTON_XBUTTON1: "Mouse 4",
 	MOUSE_BUTTON_XBUTTON2: "Mouse 5",
+}
+const JOYPAD_BUTTON_LABELS = {
+	JOY_BUTTON_A: "Cross / A",
+	JOY_BUTTON_B: "Circle / B",
+	JOY_BUTTON_X: "Square / X",
+	JOY_BUTTON_Y: "Triangle / Y",
+	JOY_BUTTON_BACK: "Share / View",
+	JOY_BUTTON_GUIDE: "PS / Xbox",
+	JOY_BUTTON_START: "Options / Menu",
+	JOY_BUTTON_LEFT_STICK: "L3 / LS",
+	JOY_BUTTON_RIGHT_STICK: "R3 / RS",
+	JOY_BUTTON_LEFT_SHOULDER: "L1 / LB",
+	JOY_BUTTON_RIGHT_SHOULDER: "R1 / RB",
+	JOY_BUTTON_DPAD_UP: "D-Pad Up",
+	JOY_BUTTON_DPAD_DOWN: "D-Pad Down",
+	JOY_BUTTON_DPAD_LEFT: "D-Pad Left",
+	JOY_BUTTON_DPAD_RIGHT: "D-Pad Right",
 }
 
 const STRATAGEM_CATEGORY_ORDER = ["priority", "orbital", "eagle", "support", "defensive", "mission"]
@@ -731,7 +782,10 @@ static func load_practice_config() -> Dictionary:
 		"show_stratagem_arrows": DEFAULT_SHOW_STRATAGEM_ARROWS,
 		"require_holding": DEFAULT_REQUIRE_HOLD,
 		"hold_binding": get_default_hold_binding(),
+		"controller_hold_binding": get_default_controller_hold_binding(),
 		"direction_bindings": get_default_direction_bindings(),
+		"controller_direction_bindings": get_default_controller_direction_bindings(),
+		"practice_stats": {},
 	}
 
 	if config.load(PRACTICE_CONFIG_PATH) != OK:
@@ -749,13 +803,51 @@ static func load_practice_config() -> Dictionary:
 	data["audio_volume"] = clampf(float(config.get_value("practice", "audio_volume", DEFAULT_AUDIO_VOLUME)), 0.0, 1.0)
 	data["show_stratagem_arrows"] = bool(config.get_value("practice", "show_stratagem_arrows", DEFAULT_SHOW_STRATAGEM_ARROWS))
 	data["require_holding"] = bool(config.get_value("practice", "require_holding", DEFAULT_REQUIRE_HOLD))
-	data["hold_binding"] = sanitize_input_binding(
-		config.get_value("practice", "hold_binding", get_default_hold_binding()),
-		get_default_hold_binding(),
+	var raw_hold_binding: Variant = config.get_value("practice", "hold_binding", get_default_hold_binding())
+	var raw_direction_bindings: Variant = config.get_value("practice", "direction_bindings", get_default_direction_bindings())
+	var raw_controller_hold_binding: Variant = config.get_value("practice", "controller_hold_binding", get_default_controller_hold_binding())
+	var raw_controller_direction_bindings: Variant = config.get_value("practice", "controller_direction_bindings", get_default_controller_direction_bindings())
+
+	data["hold_binding"] = sanitize_input_binding(raw_hold_binding, get_default_hold_binding(), true, false)
+	data["direction_bindings"] = sanitize_direction_bindings(raw_direction_bindings)
+	data["controller_hold_binding"] = sanitize_input_binding(
+		raw_controller_hold_binding,
+		get_default_controller_hold_binding(),
+		false,
 		true
 	)
-	data["direction_bindings"] = sanitize_direction_bindings(
-		config.get_value("practice", "direction_bindings", get_default_direction_bindings())
+	data["controller_direction_bindings"] = sanitize_controller_direction_bindings(raw_controller_direction_bindings)
+
+	# Migrate legacy controller bindings previously stored in the keyboard slots.
+	if data["controller_hold_binding"] == get_default_controller_hold_binding():
+		var legacy_controller_hold := sanitize_input_binding(
+			raw_hold_binding,
+			get_default_controller_hold_binding(),
+			false,
+			true
+		)
+		if str(legacy_controller_hold.get("type", "")) == "joy_button":
+			data["controller_hold_binding"] = legacy_controller_hold
+
+	if raw_controller_direction_bindings is not Dictionary:
+		var migrated_controller_bindings: Dictionary = data["controller_direction_bindings"]
+		if raw_direction_bindings is Dictionary:
+			for slot_id in DIRECTION_BINDING_SLOT_ORDER:
+				var legacy_controller_binding := sanitize_input_binding(
+					(raw_direction_bindings as Dictionary).get(slot_id, {}),
+					{},
+					false,
+					true
+				)
+				if str(legacy_controller_binding.get("type", "")) != "joy_button":
+					continue
+				var controller_slot := str(KEYBOARD_TO_CONTROLLER_DIRECTION_SLOT_MAP.get(slot_id, ""))
+				if controller_slot.is_empty():
+					continue
+				migrated_controller_bindings[controller_slot] = legacy_controller_binding
+		data["controller_direction_bindings"] = sanitize_controller_direction_bindings(migrated_controller_bindings)
+	data["practice_stats"] = sanitize_practice_stats(
+		config.get_value("practice", "practice_stats", {})
 	)
 	return data
 
@@ -767,7 +859,10 @@ static func save_practice_config(
 	show_stratagem_arrows: bool = DEFAULT_SHOW_STRATAGEM_ARROWS,
 	require_holding: bool = DEFAULT_REQUIRE_HOLD,
 	hold_binding: Dictionary = DEFAULT_HOLD_BINDING,
-	direction_bindings: Dictionary = DEFAULT_DIRECTION_BINDINGS
+	direction_bindings: Dictionary = DEFAULT_DIRECTION_BINDINGS,
+	controller_hold_binding: Dictionary = DEFAULT_CONTROLLER_HOLD_BINDING,
+	controller_direction_bindings: Dictionary = DEFAULT_CONTROLLER_DIRECTION_BINDINGS,
+	practice_stats: Dictionary = {}
 ) -> int:
 	var config := ConfigFile.new()
 	config.set_value("practice", "selected_strat_ids", selected_strat_ids)
@@ -775,8 +870,11 @@ static func save_practice_config(
 	config.set_value("practice", "audio_volume", clampf(audio_volume, 0.0, 1.0))
 	config.set_value("practice", "show_stratagem_arrows", show_stratagem_arrows)
 	config.set_value("practice", "require_holding", require_holding)
-	config.set_value("practice", "hold_binding", sanitize_input_binding(hold_binding, get_default_hold_binding(), true))
+	config.set_value("practice", "hold_binding", sanitize_input_binding(hold_binding, get_default_hold_binding(), true, false))
 	config.set_value("practice", "direction_bindings", sanitize_direction_bindings(direction_bindings))
+	config.set_value("practice", "controller_hold_binding", sanitize_input_binding(controller_hold_binding, get_default_controller_hold_binding(), false, true))
+	config.set_value("practice", "controller_direction_bindings", sanitize_controller_direction_bindings(controller_direction_bindings))
+	config.set_value("practice", "practice_stats", sanitize_practice_stats(practice_stats))
 	return config.save(PRACTICE_CONFIG_PATH)
 
 
@@ -799,8 +897,16 @@ static func get_default_hold_binding() -> Dictionary:
 	return DEFAULT_HOLD_BINDING.duplicate(true)
 
 
+static func get_default_controller_hold_binding() -> Dictionary:
+	return DEFAULT_CONTROLLER_HOLD_BINDING.duplicate(true)
+
+
 static func get_default_direction_bindings() -> Dictionary:
 	return DEFAULT_DIRECTION_BINDINGS.duplicate(true)
+
+
+static func get_default_controller_direction_bindings() -> Dictionary:
+	return DEFAULT_CONTROLLER_DIRECTION_BINDINGS.duplicate(true)
 
 
 static func sanitize_direction_bindings(raw_value: Variant) -> Dictionary:
@@ -813,12 +919,29 @@ static func sanitize_direction_bindings(raw_value: Variant) -> Dictionary:
 		sanitized[slot_id] = sanitize_input_binding(
 			raw_bindings.get(slot_id, sanitized[slot_id]),
 			DEFAULT_DIRECTION_BINDINGS[slot_id],
+			false,
 			false
 		)
 	return sanitized
 
 
-static func sanitize_input_binding(raw_value: Variant, fallback_binding: Dictionary, allow_mouse := false) -> Dictionary:
+static func sanitize_controller_direction_bindings(raw_value: Variant) -> Dictionary:
+	var sanitized := get_default_controller_direction_bindings()
+	if raw_value is not Dictionary:
+		return sanitized
+
+	var raw_bindings := raw_value as Dictionary
+	for slot_id in CONTROLLER_DIRECTION_BINDING_SLOT_ORDER:
+		sanitized[slot_id] = sanitize_input_binding(
+			raw_bindings.get(slot_id, sanitized[slot_id]),
+			DEFAULT_CONTROLLER_DIRECTION_BINDINGS[slot_id],
+			false,
+			true
+		)
+	return sanitized
+
+
+static func sanitize_input_binding(raw_value: Variant, fallback_binding: Dictionary, allow_mouse := false, allow_joy := false) -> Dictionary:
 	var fallback := fallback_binding.duplicate(true)
 	if raw_value is not Dictionary:
 		return fallback
@@ -832,6 +955,13 @@ static func sanitize_input_binding(raw_value: Variant, fallback_binding: Diction
 				"type": "key",
 				"keycode": keycode,
 			}
+	elif binding_type == "joy_button" and allow_joy:
+		var joy_button := int(raw_binding.get("button_index", -1))
+		if is_supported_joypad_button(joy_button):
+			return {
+				"type": "joy_button",
+				"button_index": joy_button,
+			}
 	elif binding_type == "mouse_button" and allow_mouse:
 		var button_index := int(raw_binding.get("button_index", 0))
 		if is_supported_mouse_button(button_index):
@@ -841,6 +971,35 @@ static func sanitize_input_binding(raw_value: Variant, fallback_binding: Diction
 			}
 
 	return fallback
+
+
+static func sanitize_practice_stats(raw_value: Variant) -> Dictionary:
+	var sanitized := {}
+	if raw_value is not Dictionary:
+		return sanitized
+
+	var raw_stats := raw_value as Dictionary
+	for raw_key in raw_stats.keys():
+		var strat_id := str(raw_key)
+		if not STRATAGEMS.has(strat_id):
+			continue
+		if raw_stats[raw_key] is not Dictionary:
+			continue
+
+		var raw_entry := raw_stats[raw_key] as Dictionary
+		var successful := maxi(0, int(raw_entry.get("successful", 0)))
+		var unsuccessful := maxi(0, int(raw_entry.get("unsuccessful", 0)))
+		var total_success_time := maxf(0.0, float(raw_entry.get("total_success_time", 0.0)))
+		if successful == 0 and unsuccessful == 0 and is_zero_approx(total_success_time):
+			continue
+
+		sanitized[strat_id] = {
+			"successful": successful,
+			"unsuccessful": unsuccessful,
+			"total_success_time": total_success_time,
+		}
+
+	return sanitized
 
 
 static func binding_from_key_event(event: InputEventKey) -> Dictionary:
@@ -857,19 +1016,38 @@ static func binding_from_mouse_button_event(event: InputEventMouseButton) -> Dic
 	}
 
 
+static func binding_from_joypad_button_event(event: InputEventJoypadButton) -> Dictionary:
+	return {
+		"type": "joy_button",
+		"button_index": int(event.button_index),
+	}
+
+
 static func binding_matches_event(binding: Dictionary, event: InputEvent) -> bool:
 	var binding_type := str(binding.get("type", ""))
 	if binding_type == "key" and event is InputEventKey:
 		return int(binding.get("keycode", KEY_NONE)) == int((event as InputEventKey).keycode)
+	if binding_type == "joy_button" and event is InputEventJoypadButton:
+		return int(binding.get("button_index", -1)) == int((event as InputEventJoypadButton).button_index)
 	if binding_type == "mouse_button" and event is InputEventMouseButton:
 		return int(binding.get("button_index", 0)) == int((event as InputEventMouseButton).button_index)
 	return false
 
 
-static func is_binding_pressed(binding: Dictionary) -> bool:
+static func is_binding_pressed(binding: Dictionary, joypad_device := -1) -> bool:
 	var binding_type := str(binding.get("type", ""))
 	if binding_type == "key":
 		return Input.is_key_pressed(int(binding.get("keycode", KEY_NONE)))
+	if binding_type == "joy_button":
+		var joy_button := int(binding.get("button_index", -1))
+		if not is_supported_joypad_button(joy_button):
+			return false
+		if joypad_device >= 0:
+			return Input.is_joy_button_pressed(joypad_device, joy_button)
+		for connected_device in Input.get_connected_joypads():
+			if Input.is_joy_button_pressed(connected_device, joy_button):
+				return true
+		return false
 	if binding_type == "mouse_button":
 		return Input.is_mouse_button_pressed(int(binding.get("button_index", 0)))
 	return false
@@ -879,6 +1057,9 @@ static func get_binding_label(binding: Dictionary) -> String:
 	var binding_type := str(binding.get("type", ""))
 	if binding_type == "mouse_button":
 		return MOUSE_BUTTON_LABELS.get(int(binding.get("button_index", 0)), "Mouse")
+	if binding_type == "joy_button":
+		var joy_button := int(binding.get("button_index", -1))
+		return JOYPAD_BUTTON_LABELS.get(joy_button, "Pad Button %d" % joy_button)
 
 	var keycode := int(binding.get("keycode", KEY_NONE))
 	if keycode == KEY_NONE:
@@ -896,6 +1077,19 @@ static func get_direction_binding_summary(direction_bindings: Dictionary) -> Str
 	return "%s or %s" % [primary, secondary]
 
 
+static func get_controller_direction_binding_summary(controller_direction_bindings: Dictionary) -> String:
+	var labels: Array[String] = []
+	var is_default_dpad := true
+	for slot_id in CONTROLLER_DIRECTION_BINDING_SLOT_ORDER:
+		var binding: Dictionary = controller_direction_bindings.get(slot_id, DEFAULT_CONTROLLER_DIRECTION_BINDINGS[slot_id])
+		labels.append(get_binding_label(binding))
+		if binding != DEFAULT_CONTROLLER_DIRECTION_BINDINGS[slot_id]:
+			is_default_dpad = false
+	if is_default_dpad:
+		return "D-Pad"
+	return "/".join(labels)
+
+
 static func get_binding_slot_group_label(direction_bindings: Dictionary, slot_ids: Array) -> String:
 	var labels: Array[String] = []
 	for slot_id in slot_ids:
@@ -911,5 +1105,45 @@ static func get_arrow_for_direction_event(event: InputEvent, direction_bindings:
 	return -1
 
 
+static func get_arrow_for_controller_event(event: InputEvent, controller_direction_bindings: Dictionary) -> int:
+	for slot_id in CONTROLLER_DIRECTION_BINDING_SLOT_ORDER:
+		var binding: Dictionary = controller_direction_bindings.get(slot_id, DEFAULT_CONTROLLER_DIRECTION_BINDINGS[slot_id])
+		if binding_matches_event(binding, event):
+			return CONTROLLER_DIRECTION_BINDING_ARROW_MAP[slot_id]
+
+	if event is InputEventJoypadButton:
+		return DEFAULT_CONTROLLER_DIRECTION_BUTTONS.get(int((event as InputEventJoypadButton).button_index), -1)
+	return -1
+
+
 static func is_supported_mouse_button(button_index: int) -> bool:
 	return MOUSE_BUTTON_LABELS.has(button_index)
+
+
+static func is_supported_joypad_button(button_index: int) -> bool:
+	return button_index >= 0 and button_index < JOY_BUTTON_MAX
+
+
+static func is_default_controller_hold_pressed(joypad_device := -1) -> bool:
+	if joypad_device >= 0:
+		return Input.is_joy_button_pressed(joypad_device, DEFAULT_CONTROLLER_HOLD_BUTTON)
+	for connected_device in Input.get_connected_joypads():
+		if Input.is_joy_button_pressed(connected_device, DEFAULT_CONTROLLER_HOLD_BUTTON):
+			return true
+	return false
+
+
+static func is_hold_input_active(binding: Dictionary, controller_binding: Dictionary = DEFAULT_CONTROLLER_HOLD_BINDING, joypad_device := -1) -> bool:
+	return is_binding_pressed(binding, joypad_device) or is_binding_pressed(controller_binding, joypad_device)
+
+
+static func get_default_controller_hold_label() -> String:
+	return JOYPAD_BUTTON_LABELS.get(DEFAULT_CONTROLLER_HOLD_BUTTON, "L1 / LB")
+
+
+static func get_hold_binding_summary(binding: Dictionary, controller_binding: Dictionary = DEFAULT_CONTROLLER_HOLD_BINDING) -> String:
+	var configured_label := get_binding_label(binding)
+	var controller_label := get_binding_label(controller_binding)
+	if configured_label == controller_label:
+		return configured_label
+	return "%s or %s" % [configured_label, controller_label]
