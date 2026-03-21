@@ -19,7 +19,7 @@ const GLOBAL_DATA = preload("res://Src/Global.gd")
 @onready var reset_defaults_btn: Button = %ResetDefaultsBtn
 @onready var hold_binding_btn: Button = %HoldBindingBtn
 @onready var bindings_help_label: Label = %BindingsHelpLabel
-@onready var web_hold_warning_label: Label = %WebHoldWarningLabel
+@onready var web_hold_warning_label: RichTextLabel = %WebHoldWarningLabel
 @onready var up_primary_btn: Button = %UpPrimaryBtn
 @onready var up_secondary_btn: Button = %UpSecondaryBtn
 @onready var left_primary_btn: Button = %LeftPrimaryBtn
@@ -72,6 +72,7 @@ func _ready() -> void:
 	require_holding_toggle.toggled.connect(_on_require_holding_toggled)
 	audio_volume_slider.value_changed.connect(_on_audio_volume_changed)
 	reset_defaults_btn.pressed.connect(_on_reset_defaults_pressed)
+	web_hold_warning_label.meta_clicked.connect(_on_web_hold_warning_meta_clicked)
 	for slot_id in binding_buttons.keys():
 		var button: Button = binding_buttons[slot_id]
 		button.pressed.connect(_on_binding_capture_requested.bind(slot_id))
@@ -405,3 +406,12 @@ func _update_web_hold_warning() -> void:
 		and int(hold_binding.get("keycode", KEY_NONE)) == KEY_CTRL
 	)
 	web_hold_warning_label.visible = is_ctrl_hold
+
+
+func _on_web_hold_warning_meta_clicked(meta: Variant) -> void:
+	if str(meta) != "releases":
+		return
+
+	var err := OS.shell_open(GLOBAL_DATA.GITHUB_RELEASES_URL)
+	if err != OK:
+		push_warning("Failed to open GitHub releases link: %s" % err)

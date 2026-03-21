@@ -6,6 +6,7 @@ const PRACTICE_CONFIG_PATH = "user://practice_config.cfg"
 const MAIN_SCENE_PATH = "res://Src/main.tscn"
 const TRAIN_SCENE_PATH = "res://Src/train.tscn"
 const GITHUB_REPO_URL = "https://github.com/stmSi/hd2-stratagems-mini-game-training"
+const GITHUB_RELEASES_URL = "https://github.com/stmSi/hd2-stratagems-mini-game-training/releases"
 const DEFAULT_AUDIO_VOLUME = 0.7
 const DEFAULT_SHOW_STRATAGEM_ARROWS = true
 const DEFAULT_REQUIRE_HOLD = false
