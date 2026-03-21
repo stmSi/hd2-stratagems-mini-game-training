@@ -2,6 +2,8 @@
 
 Practice/Training Mini-game for practicing Helldivers 2 stratagem input sequences.
 
+Supports keyboard/mouse and controller input, with remapping for both.
+
 Made with [Godot Engine](https://godotengine.org/).
 
 ## Play Online
@@ -17,6 +19,10 @@ https://stmsi.github.io/hd2-stratagems-mini-game-training/
 ### Train Screen
 
 ![Train Screen](Train_Screen.png)
+
+### Settings
+
+![Settings](Settings_UI.png)
 
 ## Credits / Sources
 
