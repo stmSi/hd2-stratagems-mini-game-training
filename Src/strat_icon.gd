@@ -2,6 +2,7 @@ extends TextureButton
 
 const STRATEGEM_TOOLTIP = preload("res://Src/strategem_tooltip.tscn")
 const TOOLTIP_OFFSET := Vector2(18, 18)
+const TOOLTIP_Z_INDEX := 100
 const BASE_SCALE := Vector2.ONE
 const HOVER_SCALE := Vector2(1.08, 1.08)
 const PRESSED_SCALE := Vector2(0.93, 0.93)
@@ -200,7 +201,10 @@ func _on_mouse_entered() -> void:
 	tooltip_instance.set_strategem(strat_id, Global.STRATAGEMS[strat_id])
 	tooltip_instance.set_show_sequence(show_stratagem_arrows)
 	tooltip_instance.top_level = true
+	tooltip_instance.z_as_relative = false
+	tooltip_instance.z_index = TOOLTIP_Z_INDEX
 	get_window().add_child(tooltip_instance)
+	tooltip_instance.move_to_front()
 	tooltip_instance.reset_size()
 	_update_tooltip_position()
 	set_process(true)
@@ -254,6 +258,7 @@ func _update_tooltip_position() -> void:
 	next_position.x = clampf(next_position.x, 0.0, maxf(0.0, viewport_size.x - tooltip_size.x))
 	next_position.y = clampf(next_position.y, 0.0, maxf(0.0, viewport_size.y - tooltip_size.y))
 	tooltip_instance.global_position = window_rect.position + next_position
+	tooltip_instance.move_to_front()
 
 
 func _exit_tree() -> void:
