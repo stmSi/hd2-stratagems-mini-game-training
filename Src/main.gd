@@ -128,8 +128,8 @@ func _add_category_section(category: String, strat_ids: Array) -> void:
 	var grid := GridContainer.new()
 	grid.columns = 8
 	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	grid.add_theme_constant_override("h_separation", 15)
-	grid.add_theme_constant_override("v_separation", 15)
+	grid.add_theme_constant_override("h_separation", 22)
+	grid.add_theme_constant_override("v_separation", 22)
 	list_of_strats.add_child(grid)
 
 	for strat_id in strat_ids:
