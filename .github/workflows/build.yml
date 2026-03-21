@@ -89,6 +89,7 @@ jobs:
           cp "$GITHUB_WORKSPACE/Web/favicon.ico" "$GITHUB_WORKSPACE/build/web/favicon.ico"
           cp "$GITHUB_WORKSPACE/Web/robots.txt" "$GITHUB_WORKSPACE/build/web/robots.txt"
           cp "$GITHUB_WORKSPACE/Web/sitemap.xml" "$GITHUB_WORKSPACE/build/web/sitemap.xml"
+          find "$GITHUB_WORKSPACE" -maxdepth 1 -type f -name 'google*.html' -exec cp {} "$GITHUB_WORKSPACE/build/web/" \;
           rm -f "$GITHUB_WORKSPACE/build/web/index.png"
 
       - name: Configure GitHub Pages
