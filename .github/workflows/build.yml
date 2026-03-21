@@ -87,6 +87,8 @@ jobs:
           cp "$GITHUB_WORKSPACE/Web/cover.jpg" "$GITHUB_WORKSPACE/build/web/cover.jpg"
           cp "$GITHUB_WORKSPACE/Web/favicon.svg" "$GITHUB_WORKSPACE/build/web/favicon.svg"
           cp "$GITHUB_WORKSPACE/Web/favicon.ico" "$GITHUB_WORKSPACE/build/web/favicon.ico"
+          cp "$GITHUB_WORKSPACE/Web/robots.txt" "$GITHUB_WORKSPACE/build/web/robots.txt"
+          cp "$GITHUB_WORKSPACE/Web/sitemap.xml" "$GITHUB_WORKSPACE/build/web/sitemap.xml"
           rm -f "$GITHUB_WORKSPACE/build/web/index.png"
 
       - name: Configure GitHub Pages

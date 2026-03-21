@@ -8,6 +8,7 @@ const PRACTICE_STRAT_ITEM_SCENE = preload("res://Src/practice_strat_item.tscn")
 @onready var player_strats: VBoxContainer = %PlayerStrats
 @onready var search_input: LineEdit = %SearchInput
 @onready var search_clear_btn: Button = %SearchClearBtn
+@onready var github_link_btn: LinkButton = %GithubLinkBtn
 @onready var settings_toggle_btn: Button = %SettingsToggleBtn
 @onready var settings_body: VBoxContainer = %SettingsBody
 @onready var randomize_toggle: CheckButton = %RandomizeToggle
@@ -67,6 +68,7 @@ func _ready() -> void:
 	_update_binding_controls()
 	search_input.text_changed.connect(_on_search_text_changed)
 	search_clear_btn.pressed.connect(_on_search_clear_pressed)
+	github_link_btn.pressed.connect(_on_github_link_pressed)
 	settings_toggle_btn.toggled.connect(_on_settings_toggled)
 	randomize_toggle.toggled.connect(_on_randomize_toggled)
 	show_arrows_toggle.toggled.connect(_on_show_arrows_toggled)
@@ -208,6 +210,12 @@ func _on_search_clear_pressed() -> void:
 
 	search_input.clear()
 	search_input.grab_focus()
+
+
+func _on_github_link_pressed() -> void:
+	var err := OS.shell_open(GLOBAL_DATA.GITHUB_REPO_URL)
+	if err != OK:
+		push_warning("Failed to open GitHub link: %s" % err)
 
 
 func _on_strat_icon_pressed(strat_id: String) -> void:
@@ -360,7 +368,10 @@ func _clear_container(container: Node) -> void:
 
 func _load_user_config() -> void:
 	var config := GLOBAL_DATA.load_practice_config()
-	user_strat_list = config["selected_strat_ids"]
+	user_strat_list.clear()
+	var loaded_strat_ids: Array = config["selected_strat_ids"]
+	for strat_id in loaded_strat_ids:
+		user_strat_list.append(str(strat_id))
 	randomize_mode = config["randomize_mode"]
 	audio_volume = config["audio_volume"]
 	show_stratagem_arrows = config["show_stratagem_arrows"]

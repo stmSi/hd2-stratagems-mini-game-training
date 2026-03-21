@@ -3,9 +3,46 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-	<title>$GODOT_PROJECT_NAME</title>
+	<title>Helldivers 2 Stratagem Training Mini Game</title>
+	<meta name="description" content="Practice Helldivers 2 stratagem input sequences in your browser. Build a practice queue, hide arrow prompts, remap controls, and train orbital, eagle, support, defensive, and mission stratagems.">
+	<meta name="robots" content="index, follow, max-image-preview:large">
+	<meta name="theme-color" content="#08111a">
+	<meta name="author" content="stmSi">
+	<link rel="canonical" href="https://stmsi.github.io/hd2-stratagems-mini-game-training/">
+	<meta property="og:type" content="website">
+	<meta property="og:site_name" content="Helldivers 2 Stratagem Training Mini Game">
+	<meta property="og:title" content="Helldivers 2 Stratagem Training Mini Game">
+	<meta property="og:description" content="Practice Helldivers 2 stratagem input sequences in your browser with a custom practice queue, hidden arrows, remappable controls, and hold-to-input mode.">
+	<meta property="og:url" content="https://stmsi.github.io/hd2-stratagems-mini-game-training/">
+	<meta property="og:image" content="https://stmsi.github.io/hd2-stratagems-mini-game-training/cover.jpg">
+	<meta property="og:image:alt" content="Helldivers 2 Stratagem Training Mini Game cover art">
+	<meta name="twitter:card" content="summary_large_image">
+	<meta name="twitter:title" content="Helldivers 2 Stratagem Training Mini Game">
+	<meta name="twitter:description" content="Practice Helldivers 2 stratagem input sequences in your browser with remappable controls and custom practice queues.">
+	<meta name="twitter:image" content="https://stmsi.github.io/hd2-stratagems-mini-game-training/cover.jpg">
 	<link rel="icon" href="favicon.ico" sizes="any">
 	<link rel="icon" href="favicon.svg" type="image/svg+xml">
+	<script type="application/ld+json">
+	{
+		"@context": "https://schema.org",
+		"@type": "SoftwareApplication",
+		"name": "Helldivers 2 Stratagem Training Mini Game",
+		"applicationCategory": "GameApplication",
+		"operatingSystem": "Web Browser",
+		"browserRequirements": "Requires JavaScript and HTML5 Canvas support.",
+		"url": "https://stmsi.github.io/hd2-stratagems-mini-game-training/",
+		"image": "https://stmsi.github.io/hd2-stratagems-mini-game-training/cover.jpg",
+		"description": "An unofficial Helldivers 2 browser practice tool for learning stratagem input sequences, building custom training queues, and drilling keyboard controls.",
+		"isAccessibleForFree": true,
+		"creator": {
+			"@type": "Person",
+			"name": "stmSi"
+		},
+		"sameAs": [
+			"https://github.com/stmSi/hd2-stratagems-mini-game-training"
+		]
+	}
+	</script>
 	$GODOT_HEAD_INCLUDE
 	<style>
 		:root {
@@ -147,6 +184,22 @@
 			text-transform: uppercase;
 		}
 
+		.loader-summary {
+			margin: 18px 0 0;
+			max-width: 62ch;
+			color: rgba(247, 240, 218, 0.88);
+			font-size: 15px;
+			line-height: 1.6;
+		}
+
+		.loader-highlights {
+			margin: 14px 0 0;
+			padding-left: 18px;
+			color: var(--muted);
+			font-size: 14px;
+			line-height: 1.55;
+		}
+
 		.loader-divider {
 			height: 1px;
 			margin: 18px 0 18px;
@@ -283,8 +336,17 @@
 	<div id="status">
 		<div id="status-panel">
 			<div class="loader-kicker">Super Earth Uplink</div>
-			<div class="loader-title">HELLDIVERS 2</div>
-			<div class="loader-subtitle">Stratagem Training Simulation</div>
+			<h1 class="loader-title">HELLDIVERS 2</h1>
+			<p class="loader-subtitle">Stratagem Training Simulation</p>
+			<p class="loader-summary">
+				Practice Helldivers 2 stratagem input sequences in your browser with custom training queues,
+				remappable controls, hidden arrow prompts, and hold-to-input mode.
+			</p>
+			<ul class="loader-highlights">
+				<li>Train Reinforce, Resupply, Orbital, Eagle, Support, Defensive, and Mission stratagems.</li>
+				<li>Build a personal practice queue and keep settings saved between sessions.</li>
+				<li>Play instantly on desktop or mobile browser through GitHub Pages.</li>
+			</ul>
 			<div class="loader-divider"></div>
 			<div class="loader-row">
 				<div id="status-phase">Booting Stratagem Terminal</div>

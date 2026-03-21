@@ -215,6 +215,14 @@ custom_minimum_size = Vector2(100, 42)
 layout_mode = 2
 text = "Clear"
 
+[node name="GithubLinkBtn" type="LinkButton" parent="VBoxContainer/RootLayout/SearchRow" unique_id=1823757746]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(84, 42)
+layout_mode = 2
+theme_override_font_sizes/font_size = 17
+text = "GitHub"
+underline = 1
+
 [node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/RootLayout" unique_id=2126227026]
 layout_mode = 2
 size_flags_vertical = 3

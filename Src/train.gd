@@ -6,6 +6,7 @@ const FAIL_SFX_BASE_DB := -4.5
 const SUCCESS_SFX_BASE_DB := -3.0
 
 @onready var back_btn: Button = %BackBtn
+@onready var github_link_btn: LinkButton = %GithubLinkBtn
 @onready var show_arrows_toggle: CheckButton = %ShowArrowsToggle
 @onready var require_holding_toggle: CheckButton = %RequireHoldingToggle
 @onready var mode_label: Label = %ModeLabel
@@ -40,6 +41,7 @@ func _ready() -> void:
 	hold_state_base_scale = hold_state_label.scale
 	back_btn.focus_mode = Control.FOCUS_NONE
 	back_btn.pressed.connect(_on_back_pressed)
+	github_link_btn.pressed.connect(_on_github_link_pressed)
 	_load_config()
 	show_arrows_toggle.button_pressed = show_stratagem_arrows
 	require_holding_toggle.button_pressed = require_holding
@@ -94,7 +96,10 @@ func _input(event: InputEvent) -> void:
 
 func _load_config() -> void:
 	var config := GLOBAL_DATA.load_practice_config()
-	selected_strat_ids = config["selected_strat_ids"]
+	selected_strat_ids.clear()
+	var loaded_strat_ids: Array = config["selected_strat_ids"]
+	for strat_id in loaded_strat_ids:
+		selected_strat_ids.append(str(strat_id))
 	randomize_mode = config["randomize_mode"]
 	audio_volume = config["audio_volume"]
 	show_stratagem_arrows = config["show_stratagem_arrows"]
@@ -194,6 +199,12 @@ func _on_back_pressed() -> void:
 	var err := get_tree().change_scene_to_file(GLOBAL_DATA.MAIN_SCENE_PATH)
 	if err != OK:
 		push_warning("Failed to return to main scene: %s" % err)
+
+
+func _on_github_link_pressed() -> void:
+	var err := OS.shell_open(GLOBAL_DATA.GITHUB_REPO_URL)
+	if err != OK:
+		push_warning("Failed to open GitHub link: %s" % err)
 
 
 func _on_show_arrows_toggled(toggled_on: bool) -> void:
