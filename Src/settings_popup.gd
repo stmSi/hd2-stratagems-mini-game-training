@@ -19,6 +19,7 @@ const GLOBAL_DATA = preload("res://Src/Global.gd")
 @onready var reset_defaults_btn: Button = %ResetDefaultsBtn
 @onready var hold_binding_btn: Button = %HoldBindingBtn
 @onready var bindings_help_label: Label = %BindingsHelpLabel
+@onready var web_hold_warning_label: Label = %WebHoldWarningLabel
 @onready var up_primary_btn: Button = %UpPrimaryBtn
 @onready var up_secondary_btn: Button = %UpSecondaryBtn
 @onready var left_primary_btn: Button = %LeftPrimaryBtn
@@ -271,6 +272,8 @@ func _update_binding_controls() -> void:
 	else:
 		bindings_help_label.text = "Press a key for %s. Press Esc to cancel." % _get_binding_slot_label(pending_binding_slot)
 
+	_update_web_hold_warning()
+
 
 func _on_binding_capture_requested(slot_id: String) -> void:
 	if pending_binding_slot == slot_id:
@@ -389,3 +392,16 @@ func _get_controller_slot_id(slot_id: String) -> String:
 			return "right"
 		_:
 			return ""
+
+
+func _update_web_hold_warning() -> void:
+	if not OS.has_feature("web"):
+		web_hold_warning_label.visible = false
+		return
+
+	var is_ctrl_hold := (
+		require_holding
+		and str(hold_binding.get("type", "")) == "key"
+		and int(hold_binding.get("keycode", KEY_NONE)) == KEY_CTRL
+	)
+	web_hold_warning_label.visible = is_ctrl_hold

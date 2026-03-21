@@ -192,6 +192,15 @@ theme_override_font_sizes/font_size = 15
 text = "Press a key or mouse button to rebind keyboard inputs."
 autowrap_mode = 2
 
+[node name="WebHoldWarningLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsTabs/KeyboardTab" unique_id=208934611]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.78, 0.5, 0.96)
+theme_override_font_sizes/font_size = 15
+text = "Web warning: Ctrl as Hold Binding can trigger browser shortcuts. Use another hold input, or use the native Windows/Linux build for reliable play."
+autowrap_mode = 2
+
 [node name="BindingsGrid" type="GridContainer" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsTabs/KeyboardTab" unique_id=1238161810]
 layout_mode = 2
 theme_override_constants/h_separation = 10
