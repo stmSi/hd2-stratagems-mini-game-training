@@ -4,6 +4,20 @@ Practice/Training Mini-game for practicing Helldivers 2 stratagem input sequence
 
 Supports keyboard/mouse and controller input, with remapping for both.
 
+Includes the current developer-released catalogue through the June 2026 FRV variants and the April 2026 Exo Experts Warbond.
+
+## Player-created stratagems
+
+Use **+ Custom Stratagem** on the main screen to add, edit, or delete your own entries. Each entry supports:
+
+- A custom name and category
+- A 1–20 direction input code, entered with arrow symbols or `U`, `D`, `L`, and `R`
+- PNG, JPG, WebP, or SVG icons up to 3 MB and 2048 × 2048 pixels
+
+Custom entries, icons, practice queues, and stats stay on the player's own system. Desktop builds use Godot's per-user application-data directory. Web builds use the browser's persistent local Godot filesystem (IndexedDB); data is local to that browser profile and device and is not uploaded.
+
+Right-click a custom stratagem icon to edit it quickly.
+
 Made with [Godot Engine](https://godotengine.org/).
 
 ## Play Online
@@ -33,6 +47,8 @@ https://stmsi.github.io/hd2-stratagems-mini-game-training/
 ### Stratagem data source
 
 - https://github.com/k33bs/Helldivers-2-Stratagem-JSON-Generator
+- https://helldivers.wiki.gg/wiki/Stratagems
+- https://blog.playstation.com/2026/04/21/helldivers-2-the-exo-experts-warbond-drops-april-28/
 
 ### Sound effects source
 

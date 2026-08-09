@@ -3,6 +3,11 @@ extends Node
 enum ARROW {DOWN, LEFT, UP, RIGHT}
 
 const PRACTICE_CONFIG_PATH = "user://practice_config.cfg"
+const CUSTOM_STRATAGEMS_PATH = "user://custom_stratagems.json"
+const CUSTOM_ICON_DIRECTORY = "user://custom_stratagem_icons"
+const CUSTOM_ICON_MAX_BYTES = 3 * 1024 * 1024
+const CUSTOM_ICON_MAX_DIMENSION = 2048
+const CUSTOM_ICON_DISPLAY_SIZE = 512
 const MAIN_SCENE_PATH = "res://Src/main.tscn"
 const TRAIN_SCENE_PATH = "res://Src/train.tscn"
 const GITHUB_REPO_URL = "https://github.com/stmSi/hd2-stratagems-mini-game-training"
@@ -173,6 +178,8 @@ const BALLISTIC_SHIELD_BACKPACK_STRATAGEM_ICON = preload("uid://bj6lvk3d7wty5")
 const BASTION_MK_XVI_STRATAGEM_ICON = preload("uid://b51hhl2hic75g")
 const BELT_FED_GRENADE_LAUNCHER_STRATAGEM_ICON = preload("uid://cnf0ea8ddv7al")
 const BREACHING_HAMMER_STRATAGEM_ICON = preload("uid://c5g63ke74eocn")
+const BREAKTHROUGH_EXOSUIT_STRATAGEM_ICON = preload("res://Assets/icons/Breakthrough Exosuit Stratagem Icon.svg")
+const BULLET_STORM_STRATAGEM_ICON = preload("res://Assets/icons/Bullet Storm Stratagem Icon.svg")
 const C_4_PACK_STRATAGEM_ICON = preload("uid://4lktsbtfl605")
 const CALL_IN_SUPER_DESTROYER_STRATAGEM_ICON = preload("uid://dosb6u0yti4ki")
 const CARGO_CONTAINER_STRATAGEM_ICON = preload("uid://htjle5c7cmp8")
@@ -210,12 +217,14 @@ const HELLBOMB_STRATAGEM_ICON = preload("uid://biaire5ftqdu6")
 const HMG_EMPLACEMENT_STRATAGEM_ICON = preload("uid://cw4wa8awxlwla")
 const HOT_DOG_STRATAGEM_ICON = preload("uid://bdyygxfhpmlb0")
 const HOVER_PACK_STRATAGEM_ICON = preload("uid://dk55dxfgq8ikk")
+const INCINERATOR_FRV_STRATAGEM_ICON = preload("res://Assets/icons/Incinerator FRV Stratagem Icon.svg")
 const INCENDIARY_MINES_STRATAGEM_ICON = preload("uid://bt5ddwp15grwp")
 const JUMP_PACK_STRATAGEM_ICON = preload("uid://baq4rgdbfp0ud")
 const K_9_STRATAGEM_ICON = preload("uid://ddx5rt34tg7rl")
 const LASER_CANNON_STRATAGEM_ICON = preload("uid://cxrhht80mwk7m")
 const LASER_SENTRY_STRATAGEM_ICON = preload("uid://cnhvv5gflv1s4")
 const LEVELLER_STRATAGEM_ICON = preload("uid://dgjavbilvj33b")
+const LUMBERER_EXOSUIT_STRATAGEM_ICON = preload("res://Assets/icons/Lumberer Exosuit Stratagem Icon.svg")
 const MACHINE_GUN_SENTRY_STRATAGEM_ICON = preload("uid://cogq7o821obn6")
 const MACHINE_GUN_STRATAGEM_ICON = preload("uid://dev15ju2djofe")
 const MAXIGUN_STRATAGEM_ICON = preload("uid://dc0o8mn24bjie")
@@ -261,9 +270,13 @@ const STRATAGEM_ARROW_RIGHT = preload("uid://4qd5kbllk47s")
 const STRATAGEM_ARROW_UP = preload("uid://b6kj2fqvf63gp")
 const SUPER_EARTH_FLAG_STRATAGEM_ICON = preload("uid://qkfea0c10y6y")
 const SUPPLY_PACK_STRATAGEM_ICON = preload("uid://dug4flgdpoyee")
+const SUPPLY_FRV_STRATAGEM_ICON = preload("res://Assets/icons/Supply FRV Stratagem Icon.svg")
 const TESLA_TOWER_STRATAGEM_ICON = preload("uid://7wdo66xvnp87")
 const W_A_S_P__LAUNCHER_STRATAGEM_ICON = preload("uid://dj32pqfuw1d1p")
 const WARP_PACK_STRATAGEM_ICON = preload("uid://bwmt438cmwrjy")
+
+static var CUSTOM_STRATAGEMS: Dictionary = {}
+static var _custom_stratagems_loaded := false
 
 const STRATAGEMS = {
 	"AIRBURST_ROCKET_LAUNCHER": {
@@ -325,6 +338,16 @@ const STRATAGEMS = {
 		"name": "Breaching Hammer",
 		"icon": BREACHING_HAMMER_STRATAGEM_ICON,
 		"sequence": [ARROW.DOWN, ARROW.LEFT, ARROW.RIGHT, ARROW.LEFT, ARROW.UP],
+	},
+	"BREAKTHROUGH_EXOSUIT": {
+		"name": "Breakthrough Exosuit",
+		"icon": BREAKTHROUGH_EXOSUIT_STRATAGEM_ICON,
+		"sequence": [ARROW.LEFT, ARROW.DOWN, ARROW.RIGHT, ARROW.LEFT, ARROW.RIGHT, ARROW.DOWN, ARROW.UP],
+	},
+	"BULLET_STORM": {
+		"name": "Bullet Storm",
+		"icon": BULLET_STORM_STRATAGEM_ICON,
+		"sequence": [ARROW.DOWN, ARROW.LEFT, ARROW.DOWN, ARROW.RIGHT, ARROW.UP, ARROW.LEFT],
 	},
 	"C_4_PACK": {
 		"name": "C-4 Pack",
@@ -516,6 +539,11 @@ const STRATAGEMS = {
 		"icon": INCENDIARY_MINES_STRATAGEM_ICON,
 		"sequence": [ARROW.DOWN, ARROW.LEFT, ARROW.LEFT, ARROW.DOWN],
 	},
+	"INCINERATOR_FRV": {
+		"name": "Incinerator FRV",
+		"icon": INCINERATOR_FRV_STRATAGEM_ICON,
+		"sequence": [ARROW.LEFT, ARROW.DOWN, ARROW.RIGHT, ARROW.LEFT, ARROW.DOWN, ARROW.UP, ARROW.UP],
+	},
 	"JUMP_PACK": {
 		"name": "Jump Pack",
 		"icon": JUMP_PACK_STRATAGEM_ICON,
@@ -540,6 +568,11 @@ const STRATAGEMS = {
 		"name": "Leveller",
 		"icon": LEVELLER_STRATAGEM_ICON,
 		"sequence": [ARROW.DOWN, ARROW.DOWN, ARROW.LEFT, ARROW.UP, ARROW.DOWN],
+	},
+	"LUMBERER_EXOSUIT": {
+		"name": "Lumberer Exosuit",
+		"icon": LUMBERER_EXOSUIT_STRATAGEM_ICON,
+		"sequence": [ARROW.LEFT, ARROW.DOWN, ARROW.RIGHT, ARROW.UP, ARROW.RIGHT, ARROW.LEFT, ARROW.UP],
 	},
 	"MACHINE_GUN_SENTRY": {
 		"name": "Machine Gun Sentry",
@@ -746,6 +779,11 @@ const STRATAGEMS = {
 		"icon": SUPPLY_PACK_STRATAGEM_ICON,
 		"sequence": [ARROW.DOWN, ARROW.LEFT, ARROW.DOWN, ARROW.UP, ARROW.UP, ARROW.DOWN],
 	},
+	"SUPPLY_FRV": {
+		"name": "Supply FRV",
+		"icon": SUPPLY_FRV_STRATAGEM_ICON,
+		"sequence": [ARROW.LEFT, ARROW.DOWN, ARROW.LEFT, ARROW.LEFT, ARROW.DOWN, ARROW.UP, ARROW.RIGHT],
+	},
 	"TESLA_TOWER": {
 		"name": "Tesla Tower",
 		"icon": TESLA_TOWER_STRATAGEM_ICON,
@@ -764,7 +802,265 @@ const STRATAGEMS = {
 }
 
 
+static func load_custom_stratagems(force_reload := false) -> void:
+	if _custom_stratagems_loaded and not force_reload:
+		return
+
+	CUSTOM_STRATAGEMS.clear()
+	_custom_stratagems_loaded = true
+	if not FileAccess.file_exists(CUSTOM_STRATAGEMS_PATH):
+		return
+
+	var file := FileAccess.open(CUSTOM_STRATAGEMS_PATH, FileAccess.READ)
+	if not file:
+		push_warning("Failed to open custom stratagem data.")
+		return
+
+	var parsed: Variant = JSON.parse_string(file.get_as_text())
+	if parsed is not Array:
+		push_warning("Custom stratagem data is invalid and was ignored.")
+		return
+
+	for raw_entry in parsed as Array:
+		if raw_entry is not Dictionary:
+			continue
+		var entry := raw_entry as Dictionary
+		var strat_id := str(entry.get("id", ""))
+		var name := str(entry.get("name", "")).strip_edges()
+		var category := str(entry.get("category", "support"))
+		var sequence := sanitize_stratagem_sequence(entry.get("sequence", []))
+		if not _is_valid_custom_stratagem_id(strat_id):
+			continue
+		if name.is_empty() or name.length() > 48 or sequence.is_empty():
+			continue
+		if not STRATAGEM_CATEGORY_ORDER.has(category):
+			category = "support"
+
+		var icon_path := _get_custom_icon_path(strat_id)
+		var icon: Texture2D = _load_custom_icon(icon_path)
+		if not icon:
+			icon = START_UPLOAD_STRATAGEM_ICON
+		CUSTOM_STRATAGEMS[strat_id] = {
+			"name": name,
+			"icon": icon,
+			"sequence": sequence,
+			"category": category,
+			"custom": true,
+		}
+
+
+static func get_all_stratagems() -> Dictionary:
+	load_custom_stratagems()
+	var catalogue := STRATAGEMS.duplicate()
+	for strat_id in CUSTOM_STRATAGEMS:
+		catalogue[strat_id] = CUSTOM_STRATAGEMS[strat_id]
+	return catalogue
+
+
+static func get_custom_stratagems() -> Dictionary:
+	load_custom_stratagems()
+	return CUSTOM_STRATAGEMS.duplicate()
+
+
+static func has_stratagem(strat_id: String) -> bool:
+	load_custom_stratagems()
+	return STRATAGEMS.has(strat_id) or CUSTOM_STRATAGEMS.has(strat_id)
+
+
+static func get_stratagem(strat_id: String) -> Dictionary:
+	load_custom_stratagems()
+	if CUSTOM_STRATAGEMS.has(strat_id):
+		return CUSTOM_STRATAGEMS[strat_id]
+	if STRATAGEMS.has(strat_id):
+		return STRATAGEMS[strat_id]
+	return {}
+
+
+static func is_custom_stratagem(strat_id: String) -> bool:
+	load_custom_stratagems()
+	return CUSTOM_STRATAGEMS.has(strat_id)
+
+
+static func save_custom_stratagem(
+	strat_id: String,
+	name: String,
+	category: String,
+	sequence_value: Variant,
+	icon_bytes := PackedByteArray(),
+	icon_file_name := ""
+) -> Dictionary:
+	load_custom_stratagems()
+	name = name.strip_edges()
+	if name.is_empty():
+		return {"ok": false, "error": "Enter a stratagem name."}
+	if name.length() > 48:
+		return {"ok": false, "error": "Names can be at most 48 characters."}
+	if not STRATAGEM_CATEGORY_ORDER.has(category):
+		return {"ok": false, "error": "Choose a valid category."}
+
+	var sequence := sanitize_stratagem_sequence(sequence_value)
+	if sequence.is_empty():
+		return {"ok": false, "error": "Enter a code using 1–20 directions."}
+	if not strat_id.is_empty() and not CUSTOM_STRATAGEMS.has(strat_id):
+		return {"ok": false, "error": "That custom stratagem no longer exists."}
+
+	var is_new := strat_id.is_empty()
+	if is_new:
+		strat_id = _create_custom_stratagem_id()
+	if icon_bytes.is_empty() and is_new:
+		return {"ok": false, "error": "Choose a PNG, JPG, WebP, or SVG icon."}
+
+	var icon: Texture2D
+	if not icon_bytes.is_empty():
+		var decoded := _decode_custom_icon(icon_bytes, icon_file_name)
+		if not bool(decoded.get("ok", false)):
+			return decoded
+		var image := decoded["image"] as Image
+		var icon_directory_error := DirAccess.make_dir_recursive_absolute(
+			ProjectSettings.globalize_path(CUSTOM_ICON_DIRECTORY)
+		)
+		if icon_directory_error != OK:
+			return {"ok": false, "error": "Could not create local icon storage."}
+		var save_error := image.save_png(_get_custom_icon_path(strat_id))
+		if save_error != OK:
+			return {"ok": false, "error": "Could not save the custom icon."}
+		icon = ImageTexture.create_from_image(image)
+	else:
+		icon = CUSTOM_STRATAGEMS[strat_id]["icon"]
+
+	CUSTOM_STRATAGEMS[strat_id] = {
+		"name": name,
+		"icon": icon,
+		"sequence": sequence,
+		"category": category,
+		"custom": true,
+	}
+	var write_error := _write_custom_stratagems()
+	if write_error != OK:
+		return {"ok": false, "error": "Could not save custom stratagem data."}
+	return {"ok": true, "id": strat_id}
+
+
+static func delete_custom_stratagem(strat_id: String) -> int:
+	load_custom_stratagems()
+	if not CUSTOM_STRATAGEMS.has(strat_id):
+		return ERR_DOES_NOT_EXIST
+	CUSTOM_STRATAGEMS.erase(strat_id)
+	var icon_path := _get_custom_icon_path(strat_id)
+	if FileAccess.file_exists(icon_path):
+		var remove_error := DirAccess.remove_absolute(ProjectSettings.globalize_path(icon_path))
+		if remove_error != OK:
+			push_warning("Failed to remove custom icon: %s" % icon_path)
+	return _write_custom_stratagems()
+
+
+static func sanitize_stratagem_sequence(raw_value: Variant) -> Array:
+	var sanitized: Array = []
+	if raw_value is not Array:
+		return sanitized
+	for raw_arrow in raw_value as Array:
+		var arrow := int(raw_arrow)
+		if arrow < ARROW.DOWN or arrow > ARROW.RIGHT:
+			return []
+		sanitized.append(arrow)
+		if sanitized.size() > 20:
+			return []
+	return sanitized
+
+
+static func create_custom_icon_preview(icon_bytes: PackedByteArray, file_name: String) -> Dictionary:
+	var decoded := _decode_custom_icon(icon_bytes, file_name)
+	if not bool(decoded.get("ok", false)):
+		return decoded
+	return {
+		"ok": true,
+		"texture": ImageTexture.create_from_image(decoded["image"] as Image),
+	}
+
+
+static func _decode_custom_icon(icon_bytes: PackedByteArray, file_name: String) -> Dictionary:
+	if icon_bytes.is_empty() or icon_bytes.size() > CUSTOM_ICON_MAX_BYTES:
+		return {"ok": false, "error": "Icons must be smaller than 3 MB."}
+	var extension := file_name.get_extension().to_lower()
+	var image := Image.new()
+	var load_error := ERR_FILE_UNRECOGNIZED
+	match extension:
+		"png":
+			load_error = image.load_png_from_buffer(icon_bytes)
+		"jpg", "jpeg":
+			load_error = image.load_jpg_from_buffer(icon_bytes)
+		"webp":
+			load_error = image.load_webp_from_buffer(icon_bytes)
+		"svg":
+			load_error = image.load_svg_from_buffer(icon_bytes)
+		_:
+			return {"ok": false, "error": "Use a PNG, JPG, WebP, or SVG file."}
+	if load_error != OK or image.is_empty():
+		return {"ok": false, "error": "The selected icon could not be decoded."}
+	if image.get_width() > CUSTOM_ICON_MAX_DIMENSION or image.get_height() > CUSTOM_ICON_MAX_DIMENSION:
+		return {"ok": false, "error": "Icons can be at most 2048 × 2048 pixels."}
+
+	var longest_side := maxi(image.get_width(), image.get_height())
+	if longest_side > CUSTOM_ICON_DISPLAY_SIZE:
+		var scale_factor := float(CUSTOM_ICON_DISPLAY_SIZE) / float(longest_side)
+		image.resize(
+			maxi(1, roundi(image.get_width() * scale_factor)),
+			maxi(1, roundi(image.get_height() * scale_factor)),
+			Image.INTERPOLATE_LANCZOS
+		)
+	return {"ok": true, "image": image}
+
+
+static func _load_custom_icon(icon_path: String) -> Texture2D:
+	if not FileAccess.file_exists(icon_path):
+		return null
+	var image := Image.load_from_file(icon_path)
+	if not image or image.is_empty():
+		return null
+	return ImageTexture.create_from_image(image)
+
+
+static func _write_custom_stratagems() -> int:
+	var serialized: Array = []
+	var strat_ids := CUSTOM_STRATAGEMS.keys()
+	strat_ids.sort()
+	for strat_id in strat_ids:
+		var strat: Dictionary = CUSTOM_STRATAGEMS[strat_id]
+		serialized.append({
+			"id": strat_id,
+			"name": strat["name"],
+			"category": strat["category"],
+			"sequence": strat["sequence"],
+		})
+	var file := FileAccess.open(CUSTOM_STRATAGEMS_PATH, FileAccess.WRITE)
+	if not file:
+		return FileAccess.get_open_error()
+	file.store_string(JSON.stringify(serialized, "\t"))
+	file.close()
+	if OS.has_feature("web"):
+		JavaScriptBridge.force_fs_sync()
+	return OK
+
+
+static func _create_custom_stratagem_id() -> String:
+	var strat_id := ""
+	while strat_id.is_empty() or STRATAGEMS.has(strat_id) or CUSTOM_STRATAGEMS.has(strat_id):
+		strat_id = "CUSTOM_%d_%04d" % [int(Time.get_unix_time_from_system()), randi_range(0, 9999)]
+	return strat_id
+
+
+static func _is_valid_custom_stratagem_id(strat_id: String) -> bool:
+	return strat_id.begins_with("CUSTOM_") and strat_id.is_valid_identifier()
+
+
+static func _get_custom_icon_path(strat_id: String) -> String:
+	return CUSTOM_ICON_DIRECTORY.path_join("%s.png" % strat_id)
+
+
 static func get_stratagem_category(strat_id: String) -> String:
+	load_custom_stratagems()
+	if CUSTOM_STRATAGEMS.has(strat_id):
+		return str(CUSTOM_STRATAGEMS[strat_id].get("category", "support"))
 	if STRATAGEM_CATEGORY_OVERRIDES.has(strat_id):
 		return STRATAGEM_CATEGORY_OVERRIDES[strat_id]
 	if strat_id.begins_with("ORBITAL_"):
@@ -775,6 +1071,7 @@ static func get_stratagem_category(strat_id: String) -> String:
 
 
 static func load_practice_config() -> Dictionary:
+	load_custom_stratagems()
 	var config := ConfigFile.new()
 	var data := {
 		"selected_strat_ids": [],
@@ -796,7 +1093,7 @@ static func load_practice_config() -> Dictionary:
 	var stored_ids: Array = config.get_value("practice", "selected_strat_ids", [])
 	for value in stored_ids:
 		var strat_id := str(value)
-		if STRATAGEMS.has(strat_id) and not sanitized_ids.has(strat_id):
+		if has_stratagem(strat_id) and not sanitized_ids.has(strat_id):
 			sanitized_ids.append(strat_id)
 
 	data["selected_strat_ids"] = sanitized_ids
@@ -876,13 +1173,17 @@ static func save_practice_config(
 	config.set_value("practice", "controller_hold_binding", sanitize_input_binding(controller_hold_binding, get_default_controller_hold_binding(), false, true))
 	config.set_value("practice", "controller_direction_bindings", sanitize_controller_direction_bindings(controller_direction_bindings))
 	config.set_value("practice", "practice_stats", sanitize_practice_stats(practice_stats))
-	return config.save(PRACTICE_CONFIG_PATH)
+	var save_error := config.save(PRACTICE_CONFIG_PATH)
+	if save_error == OK and OS.has_feature("web"):
+		JavaScriptBridge.force_fs_sync()
+	return save_error
 
 
 static func get_trainable_strat_ids(strat_ids: Array[String]) -> Array[String]:
 	var trainable_ids: Array[String] = []
 	for strat_id in strat_ids:
-		if STRATAGEMS.has(strat_id) and not STRATAGEMS[strat_id]["sequence"].is_empty():
+		var strat := get_stratagem(strat_id)
+		if not strat.is_empty() and not strat["sequence"].is_empty():
 			trainable_ids.append(strat_id)
 	return trainable_ids
 
@@ -982,7 +1283,7 @@ static func sanitize_practice_stats(raw_value: Variant) -> Dictionary:
 	var raw_stats := raw_value as Dictionary
 	for raw_key in raw_stats.keys():
 		var strat_id := str(raw_key)
-		if not STRATAGEMS.has(strat_id):
+		if not has_stratagem(strat_id):
 			continue
 		if raw_stats[raw_key] is not Dictionary:
 			continue

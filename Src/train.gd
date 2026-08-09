@@ -295,7 +295,7 @@ func _apply_current_stratagem() -> void:
 		status_label.text = "No trainable stratagems selected."
 		return
 
-	var strat: Dictionary = GLOBAL_DATA.STRATAGEMS[current_strat_id]
+	var strat: Dictionary = GLOBAL_DATA.get_stratagem(current_strat_id)
 	current_sequence = strat["sequence"]
 	sequence_index = 0
 	strategem_box.set_strategem(current_strat_id, strat)
@@ -434,11 +434,11 @@ func _save_user_config() -> void:
 
 
 func _refresh_next_preview() -> void:
-	if next_strat_id.is_empty() or not GLOBAL_DATA.STRATAGEMS.has(next_strat_id):
+	if next_strat_id.is_empty() or not GLOBAL_DATA.has_stratagem(next_strat_id):
 		next_up_panel.visible = false
 		return
 
-	var next_strat: Dictionary = GLOBAL_DATA.STRATAGEMS[next_strat_id]
+	var next_strat: Dictionary = GLOBAL_DATA.get_stratagem(next_strat_id)
 	next_up_panel.visible = true
 	next_strategem_icon.texture = next_strat["icon"]
 	if trainable_strat_ids.size() == 1:
@@ -509,7 +509,7 @@ func _refresh_stats_display() -> void:
 		lines.append(
 			"%s: %s | %s | %s success | Avg clear %s"
 			% [
-				GLOBAL_DATA.STRATAGEMS[strat_id]["name"],
+				GLOBAL_DATA.get_stratagem(strat_id)["name"],
 				_format_count(successful, "clear", "clears"),
 				_format_count(unsuccessful, "reset", "resets"),
 				_format_success_rate(total_attempts, successful),

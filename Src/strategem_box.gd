@@ -16,8 +16,8 @@ var base_scale := Vector2.ONE
 func _ready() -> void:
 	base_scale = scale
 	_clear_codes()
-	if strat_data.is_empty() and not strat_id.is_empty() and Global.STRATAGEMS.has(strat_id):
-		strat_data = Global.STRATAGEMS[strat_id]
+	if strat_data.is_empty() and not strat_id.is_empty() and Global.has_stratagem(strat_id):
+		strat_data = Global.get_stratagem(strat_id)
 	if not strat_data.is_empty():
 		_apply_strategem()
 	else:

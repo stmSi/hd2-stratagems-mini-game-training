@@ -17,14 +17,14 @@ var show_sequence := GLOBAL_DATA.DEFAULT_SHOW_STRATAGEM_ARROWS
 func _ready() -> void:
 	remove_btn.pressed.connect(_on_remove_pressed)
 	_clear_codes()
-	if not strat_id.is_empty() and GLOBAL_DATA.STRATAGEMS.has(strat_id):
-		_apply_stratagem(GLOBAL_DATA.STRATAGEMS[strat_id])
+	if not strat_id.is_empty() and GLOBAL_DATA.has_stratagem(strat_id):
+		_apply_stratagem(GLOBAL_DATA.get_stratagem(strat_id))
 
 
 func set_stratagem(next_strat_id: String) -> void:
 	strat_id = next_strat_id
-	if is_node_ready() and GLOBAL_DATA.STRATAGEMS.has(strat_id):
-		_apply_stratagem(GLOBAL_DATA.STRATAGEMS[strat_id])
+	if is_node_ready() and GLOBAL_DATA.has_stratagem(strat_id):
+		_apply_stratagem(GLOBAL_DATA.get_stratagem(strat_id))
 
 
 func set_show_sequence(value: bool) -> void:

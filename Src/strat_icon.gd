@@ -1,5 +1,7 @@
 extends TextureButton
 
+signal manage_requested(strat_id: String)
+
 const STRATEGEM_TOOLTIP = preload("res://Src/strategem_tooltip.tscn")
 const TOOLTIP_OFFSET := Vector2(18, 18)
 const TOOLTIP_Z_INDEX := 100
@@ -43,8 +45,8 @@ func _ready() -> void:
 func set_stratagem(next_strat_id: String) -> void:
 	strat_id = next_strat_id
 	_apply_stratagem_data()
-	if tooltip_instance and Global.STRATAGEMS.has(strat_id):
-		tooltip_instance.set_strategem(strat_id, Global.STRATAGEMS[strat_id])
+	if tooltip_instance and Global.has_stratagem(strat_id):
+		tooltip_instance.set_strategem(strat_id, Global.get_stratagem(strat_id))
 		_update_tooltip_position()
 
 
@@ -67,13 +69,13 @@ func _apply_stratagem_data() -> void:
 		tooltip_text = ""
 		return
 
-	if not Global.STRATAGEMS.has(strat_id):
+	if not Global.has_stratagem(strat_id):
 		push_warning("Unknown stratagem id: %s" % strat_id)
 		texture_normal = null
 		tooltip_text = ""
 		return
 
-	var strat: Dictionary = Global.STRATAGEMS[strat_id]
+	var strat: Dictionary = Global.get_stratagem(strat_id)
 	texture_normal = strat["icon"]
 	tooltip_text = ""
 
@@ -191,14 +193,14 @@ func _on_mouse_entered() -> void:
 	is_hovered = true
 	_refresh_visual_state()
 
-	if not Global.STRATAGEMS.has(strat_id):
+	if not Global.has_stratagem(strat_id):
 		return
 
 	if not tooltip_instance:
 		tooltip_instance = STRATEGEM_TOOLTIP.instantiate()
 	
 	
-	tooltip_instance.set_strategem(strat_id, Global.STRATAGEMS[strat_id])
+	tooltip_instance.set_strategem(strat_id, Global.get_stratagem(strat_id))
 	tooltip_instance.set_show_sequence(show_stratagem_arrows)
 	tooltip_instance.top_level = true
 	tooltip_instance.z_as_relative = false
@@ -268,7 +270,11 @@ func _exit_tree() -> void:
 
 
 func _on_gui_input(event: InputEvent) -> void:
-	pass
+	if event is InputEventMouseButton:
+		var mouse_event := event as InputEventMouseButton
+		if mouse_event.pressed and mouse_event.button_index == MOUSE_BUTTON_RIGHT and Global.is_custom_stratagem(strat_id):
+			accept_event()
+			manage_requested.emit(strat_id)
 
 
 func _notification(what: int) -> void:

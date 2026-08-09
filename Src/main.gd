@@ -4,17 +4,20 @@ const GLOBAL_DATA = preload("res://Src/Global.gd")
 const STRAT_ICON_SCENE = preload("uid://cw23thcgkm5wx")
 const PRACTICE_STRAT_ITEM_SCENE = preload("res://Src/practice_strat_item.tscn")
 const SETTINGS_POPUP_SCENE = preload("res://Src/settings_popup.tscn")
+const CUSTOM_STRATAGEM_DIALOG_SCENE = preload("res://Src/custom_stratagem_dialog.tscn")
 
 @onready var list_of_strats: VBoxContainer = %ListOfStrats
 @onready var player_strats: VBoxContainer = %PlayerStrats
 @onready var search_input: LineEdit = %SearchInput
 @onready var search_clear_btn: Button = %SearchClearBtn
+@onready var custom_stratagems_btn: Button = %CustomStratagemsBtn
 @onready var github_link_btn: LinkButton = %GithubLinkBtn
 @onready var settings_toggle_btn: Button = %SettingsToggleBtn
 @onready var clear_reset_btn: Button = %ClearResetBtn
 @onready var train_btn: Button = %TrainBtn
 
 var settings_popup: Control
+var custom_stratagem_dialog: Window
 var user_strat_list: Array[String] = []
 var search_query := ""
 var randomize_mode := false
@@ -29,12 +32,15 @@ var practice_stats: Dictionary = {}
 
 
 func _ready() -> void:
+	GLOBAL_DATA.load_custom_stratagems()
 	_load_user_config()
 	_setup_settings_popup()
+	_setup_custom_stratagem_dialog()
 	search_input.text = search_query
 	_update_search_controls()
 	search_input.text_changed.connect(_on_search_text_changed)
 	search_clear_btn.pressed.connect(_on_search_clear_pressed)
+	custom_stratagems_btn.pressed.connect(_on_custom_stratagems_pressed)
 	github_link_btn.pressed.connect(_on_github_link_pressed)
 	settings_toggle_btn.pressed.connect(_on_settings_pressed)
 	clear_reset_btn.pressed.connect(_on_clear_saved_pressed)
@@ -49,6 +55,13 @@ func _setup_settings_popup() -> void:
 	add_child(settings_popup)
 	settings_popup.config_changed.connect(_on_settings_popup_config_changed)
 	settings_popup.popup_closed.connect(_on_settings_popup_closed)
+
+
+func _setup_custom_stratagem_dialog() -> void:
+	custom_stratagem_dialog = CUSTOM_STRATAGEM_DIALOG_SCENE.instantiate()
+	add_child(custom_stratagem_dialog)
+	custom_stratagem_dialog.catalogue_changed.connect(_on_custom_catalogue_changed)
+	custom_stratagem_dialog.stratagem_deleted.connect(_on_custom_stratagem_deleted)
 
 
 func _build_settings_config() -> Dictionary:
@@ -101,7 +114,7 @@ func _populate_stratagem_list() -> void:
 	for category in GLOBAL_DATA.STRATAGEM_CATEGORY_ORDER:
 		grouped_stratagems[category] = []
 
-	for strat_id in GLOBAL_DATA.STRATAGEMS.keys():
+	for strat_id in GLOBAL_DATA.get_all_stratagems().keys():
 		if _matches_search(strat_id):
 			grouped_stratagems[GLOBAL_DATA.get_stratagem_category(strat_id)].append(strat_id)
 
@@ -112,7 +125,7 @@ func _populate_stratagem_list() -> void:
 
 
 func _sort_stratagems_by_name(a: String, b: String) -> bool:
-	return GLOBAL_DATA.STRATAGEMS[a]["name"] < GLOBAL_DATA.STRATAGEMS[b]["name"]
+	return GLOBAL_DATA.get_stratagem(a)["name"] < GLOBAL_DATA.get_stratagem(b)["name"]
 
 
 func _add_category_section(category: String, strat_ids: Array) -> void:
@@ -138,6 +151,8 @@ func _add_category_section(category: String, strat_ids: Array) -> void:
 		icon.set_selected(user_strat_list.has(strat_id))
 		icon.set_show_stratagem_arrows(show_stratagem_arrows)
 		icon.pressed.connect(_on_strat_icon_pressed.bind(strat_id))
+		if GLOBAL_DATA.is_custom_stratagem(strat_id):
+			icon.manage_requested.connect(_on_custom_stratagem_manage_requested)
 		grid.add_child(icon)
 
 
@@ -165,13 +180,14 @@ func _matches_search(strat_id: String) -> bool:
 		return true
 
 	var lowered_query := search_query.to_lower()
-	var strat: Dictionary = GLOBAL_DATA.STRATAGEMS[strat_id]
+	var strat: Dictionary = GLOBAL_DATA.get_stratagem(strat_id)
 	var category := GLOBAL_DATA.get_stratagem_category(strat_id)
 
 	return (
 		strat["name"].to_lower().contains(lowered_query)
 		or strat_id.to_lower().contains(lowered_query)
 		or GLOBAL_DATA.STRATAGEM_CATEGORY_LABELS[category].to_lower().contains(lowered_query)
+		or (GLOBAL_DATA.is_custom_stratagem(strat_id) and "custom".contains(lowered_query))
 	)
 
 
@@ -187,6 +203,26 @@ func _on_search_clear_pressed() -> void:
 
 	search_input.clear()
 	search_input.grab_focus()
+
+
+func _on_custom_stratagems_pressed() -> void:
+	custom_stratagem_dialog.open_for()
+
+
+func _on_custom_stratagem_manage_requested(strat_id: String) -> void:
+	custom_stratagem_dialog.open_for(strat_id)
+
+
+func _on_custom_catalogue_changed() -> void:
+	_refresh_saved_stratagems()
+	_populate_stratagem_list()
+	_update_action_buttons()
+
+
+func _on_custom_stratagem_deleted(strat_id: String) -> void:
+	user_strat_list.erase(strat_id)
+	practice_stats.erase(strat_id)
+	_save_user_config()
 
 
 func _on_github_link_pressed() -> void:
