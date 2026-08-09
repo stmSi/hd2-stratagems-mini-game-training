@@ -4,13 +4,14 @@ signal catalogue_changed
 signal stratagem_deleted(strat_id: String)
 
 const GLOBAL_DATA = preload("res://Src/Global.gd")
+const ARROW_CODE_ICON = preload("res://Src/arrow_code_icon.tscn")
 const DIALOG_SIZE := Vector2i(680, 720)
 
 var selector: OptionButton
 var name_input: LineEdit
 var category_input: OptionButton
 var code_input: LineEdit
-var code_preview: Label
+var code_preview: HFlowContainer
 var icon_preview: TextureRect
 var icon_file_label: Label
 var delete_btn: Button
@@ -104,14 +105,15 @@ func _build_ui() -> void:
 
 	form.add_child(_make_form_label("Input code"))
 	code_input = LineEdit.new()
-	code_input.placeholder_text = "↑ → ↓ ←  (or U R D L)"
+	code_input.placeholder_text = "U R D L  (spaces optional)"
 	code_input.text_changed.connect(_on_code_changed)
 	form.add_child(code_input)
 
 	form.add_child(_make_form_label("Code preview"))
-	code_preview = Label.new()
-	code_preview.text = "—"
-	code_preview.add_theme_font_size_override("font_size", 23)
+	code_preview = HFlowContainer.new()
+	code_preview.custom_minimum_size = Vector2(0, 34)
+	code_preview.add_theme_constant_override("h_separation", 4)
+	code_preview.add_theme_constant_override("v_separation", 4)
 	form.add_child(code_preview)
 
 	var icon_label := _make_form_label("Icon")
@@ -288,13 +290,21 @@ func _on_code_changed(_value: String) -> void:
 
 
 func _update_code_preview() -> void:
+	for child in code_preview.get_children():
+		child.queue_free()
+
 	var parsed := _parse_sequence(code_input.text)
 	if bool(parsed.get("ok", false)):
-		code_preview.text = _format_sequence(parsed["sequence"])
-		code_preview.add_theme_color_override("font_color", Color("ffd27e"))
+		for direction in parsed["sequence"]:
+			var arrow: ArrowCodeIcon = ARROW_CODE_ICON.instantiate()
+			arrow.custom_minimum_size = Vector2(30, 30)
+			arrow.set_arrow(direction)
+			code_preview.add_child(arrow)
 	else:
-		code_preview.text = "—" if code_input.text.strip_edges().is_empty() else str(parsed.get("error", "Invalid code"))
-		code_preview.add_theme_color_override("font_color", Color("ff8b7a"))
+		var message := Label.new()
+		message.text = "—" if code_input.text.strip_edges().is_empty() else str(parsed.get("error", "Invalid code"))
+		message.add_theme_color_override("font_color", Color("ff8b7a"))
+		code_preview.add_child(message)
 
 
 func _parse_sequence(raw_code: String) -> Dictionary:
@@ -337,13 +347,13 @@ func _format_sequence(sequence: Array) -> String:
 	for arrow in sequence:
 		match int(arrow):
 			GLOBAL_DATA.ARROW.DOWN:
-				symbols.append("↓")
+				symbols.append("D")
 			GLOBAL_DATA.ARROW.LEFT:
-				symbols.append("←")
+				symbols.append("L")
 			GLOBAL_DATA.ARROW.UP:
-				symbols.append("↑")
+				symbols.append("U")
 			GLOBAL_DATA.ARROW.RIGHT:
-				symbols.append("→")
+				symbols.append("R")
 	return " ".join(symbols)
 
 
