@@ -8,6 +8,9 @@ on:
       - master
     tags:
       - "v*"
+  release:
+    types:
+      - published
   pull_request:
 
 permissions:
@@ -89,14 +92,20 @@ jobs:
           cp "$GITHUB_WORKSPACE/Web/favicon.ico" "$GITHUB_WORKSPACE/build/web/favicon.ico"
           cp "$GITHUB_WORKSPACE/Web/robots.txt" "$GITHUB_WORKSPACE/build/web/robots.txt"
           cp "$GITHUB_WORKSPACE/Web/sitemap.xml" "$GITHUB_WORKSPACE/build/web/sitemap.xml"
+          cp "$GITHUB_WORKSPACE/Web/icon-192.png" "$GITHUB_WORKSPACE/build/web/index.192x192.png"
+          MANIFEST_PATH="$GITHUB_WORKSPACE/build/web/index.manifest.json"
+          jq '.icons = ([{"sizes":"192x192","src":"index.192x192.png","type":"image/png"}] + .icons)' \
+            "$MANIFEST_PATH" > "$MANIFEST_PATH.tmp"
+          mv "$MANIFEST_PATH.tmp" "$MANIFEST_PATH"
+          jq -e '.icons[] | select(.sizes == "192x192")' "$MANIFEST_PATH" >/dev/null
           rm -f "$GITHUB_WORKSPACE/build/web/index.png"
 
       - name: Configure GitHub Pages
-        if: (github.event_name == 'workflow_dispatch' || github.event_name == 'push') && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+        if: github.event_name == 'release' || ((github.event_name == 'workflow_dispatch' || github.event_name == 'push') && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v')))
         uses: actions/configure-pages@v5
 
       - name: Upload GitHub Pages artifact
-        if: (github.event_name == 'workflow_dispatch' || github.event_name == 'push') && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+        if: github.event_name == 'release' || ((github.event_name == 'workflow_dispatch' || github.event_name == 'push') && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v')))
         uses: actions/upload-pages-artifact@v4
         with:
           path: build/web
@@ -149,7 +158,7 @@ jobs:
           fi
 
   deploy-pages:
-    if: (github.event_name == 'workflow_dispatch' || github.event_name == 'push') && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    if: github.event_name == 'release' || ((github.event_name == 'workflow_dispatch' || github.event_name == 'push') && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v')))
     runs-on: ubuntu-latest
     needs: export
     environment:

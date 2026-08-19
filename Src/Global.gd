@@ -15,6 +15,11 @@ const GITHUB_RELEASES_URL = "https://github.com/stmSi/hd2-stratagems-mini-game-t
 const DEFAULT_AUDIO_VOLUME = 0.7
 const DEFAULT_SHOW_STRATAGEM_ARROWS = true
 const DEFAULT_REQUIRE_HOLD = false
+const DEFAULT_TOUCH_CONTROL_SCALE = 1.5
+const MIN_TOUCH_CONTROL_SCALE = 0.8
+const MAX_TOUCH_CONTROL_SCALE = 1.8
+const MOBILE_PORTRAIT_VIEWPORT := Vector2i(390, 900)
+const MOBILE_LANDSCAPE_VIEWPORT := Vector2i(900, 390)
 const DEFAULT_CONTROLLER_HOLD_BUTTON := JOY_BUTTON_LEFT_SHOULDER
 const DEFAULT_HOLD_BINDING = {
 	"type": "mouse_button",
@@ -109,6 +114,33 @@ const JOYPAD_BUTTON_LABELS = {
 	JOY_BUTTON_DPAD_LEFT: "D-Pad Left",
 	JOY_BUTTON_DPAD_RIGHT: "D-Pad Right",
 }
+
+
+func _ready() -> void:
+	if not is_touch_device():
+		return
+	get_tree().root.size_changed.connect(_apply_mobile_content_scale)
+	call_deferred("_apply_mobile_content_scale")
+
+
+func _apply_mobile_content_scale() -> void:
+	var window_size := DisplayServer.window_get_size()
+	if window_size.x <= 0 or window_size.y <= 0:
+		return
+	var target_size := MOBILE_LANDSCAPE_VIEWPORT if window_size.x > window_size.y else MOBILE_PORTRAIT_VIEWPORT
+	if get_tree().root.content_scale_size != target_size:
+		get_tree().root.content_scale_size = target_size
+
+
+static func is_touch_device() -> bool:
+	if DisplayServer.is_touchscreen_available():
+		return true
+	if OS.has_feature("web"):
+		return bool(JavaScriptBridge.eval(
+			"navigator.maxTouchPoints > 0 || 'ontouchstart' in window",
+			true
+		))
+	return false
 
 const STRATAGEM_CATEGORY_ORDER = ["priority", "orbital", "eagle", "support", "defensive", "mission"]
 const STRATAGEM_CATEGORY_LABELS = {
@@ -1079,6 +1111,7 @@ static func load_practice_config() -> Dictionary:
 		"audio_volume": DEFAULT_AUDIO_VOLUME,
 		"show_stratagem_arrows": DEFAULT_SHOW_STRATAGEM_ARROWS,
 		"require_holding": DEFAULT_REQUIRE_HOLD,
+		"touch_control_scale": DEFAULT_TOUCH_CONTROL_SCALE,
 		"hold_binding": get_default_hold_binding(),
 		"controller_hold_binding": get_default_controller_hold_binding(),
 		"direction_bindings": get_default_direction_bindings(),
@@ -1101,6 +1134,9 @@ static func load_practice_config() -> Dictionary:
 	data["audio_volume"] = clampf(float(config.get_value("practice", "audio_volume", DEFAULT_AUDIO_VOLUME)), 0.0, 1.0)
 	data["show_stratagem_arrows"] = bool(config.get_value("practice", "show_stratagem_arrows", DEFAULT_SHOW_STRATAGEM_ARROWS))
 	data["require_holding"] = bool(config.get_value("practice", "require_holding", DEFAULT_REQUIRE_HOLD))
+	data["touch_control_scale"] = sanitize_touch_control_scale(
+		config.get_value("practice", "touch_control_scale", DEFAULT_TOUCH_CONTROL_SCALE)
+	)
 	var raw_hold_binding: Variant = config.get_value("practice", "hold_binding", get_default_hold_binding())
 	var raw_direction_bindings: Variant = config.get_value("practice", "direction_bindings", get_default_direction_bindings())
 	var raw_controller_hold_binding: Variant = config.get_value("practice", "controller_hold_binding", get_default_controller_hold_binding())
@@ -1156,6 +1192,7 @@ static func save_practice_config(
 	audio_volume: float = DEFAULT_AUDIO_VOLUME,
 	show_stratagem_arrows: bool = DEFAULT_SHOW_STRATAGEM_ARROWS,
 	require_holding: bool = DEFAULT_REQUIRE_HOLD,
+	touch_control_scale: float = DEFAULT_TOUCH_CONTROL_SCALE,
 	hold_binding: Dictionary = DEFAULT_HOLD_BINDING,
 	direction_bindings: Dictionary = DEFAULT_DIRECTION_BINDINGS,
 	controller_hold_binding: Dictionary = DEFAULT_CONTROLLER_HOLD_BINDING,
@@ -1168,6 +1205,7 @@ static func save_practice_config(
 	config.set_value("practice", "audio_volume", clampf(audio_volume, 0.0, 1.0))
 	config.set_value("practice", "show_stratagem_arrows", show_stratagem_arrows)
 	config.set_value("practice", "require_holding", require_holding)
+	config.set_value("practice", "touch_control_scale", sanitize_touch_control_scale(touch_control_scale))
 	config.set_value("practice", "hold_binding", sanitize_input_binding(hold_binding, get_default_hold_binding(), true, false))
 	config.set_value("practice", "direction_bindings", sanitize_direction_bindings(direction_bindings))
 	config.set_value("practice", "controller_hold_binding", sanitize_input_binding(controller_hold_binding, get_default_controller_hold_binding(), false, true))
@@ -1177,6 +1215,10 @@ static func save_practice_config(
 	if save_error == OK and OS.has_feature("web"):
 		JavaScriptBridge.force_fs_sync()
 	return save_error
+
+
+static func sanitize_touch_control_scale(raw_value: Variant) -> float:
+	return clampf(float(raw_value), MIN_TOUCH_CONTROL_SCALE, MAX_TOUCH_CONTROL_SCALE)
 
 
 static func get_trainable_strat_ids(strat_ids: Array[String]) -> Array[String]:

@@ -16,6 +16,8 @@ const GLOBAL_DATA = preload("res://Src/Global.gd")
 @onready var require_holding_toggle: CheckButton = %RequireHoldingToggle
 @onready var audio_volume_slider: HSlider = %AudioVolumeSlider
 @onready var audio_volume_value_label: Label = %AudioVolumeValueLabel
+@onready var touch_control_size_slider: HSlider = %TouchControlSizeSlider
+@onready var touch_control_size_value_label: Label = %TouchControlSizeValueLabel
 @onready var reset_defaults_btn: Button = %ResetDefaultsBtn
 @onready var hold_binding_btn: Button = %HoldBindingBtn
 @onready var bindings_help_label: Label = %BindingsHelpLabel
@@ -40,6 +42,7 @@ var randomize_mode := false
 var audio_volume := GLOBAL_DATA.DEFAULT_AUDIO_VOLUME
 var show_stratagem_arrows := GLOBAL_DATA.DEFAULT_SHOW_STRATAGEM_ARROWS
 var require_holding := GLOBAL_DATA.DEFAULT_REQUIRE_HOLD
+var touch_control_scale := GLOBAL_DATA.DEFAULT_TOUCH_CONTROL_SCALE
 var hold_binding: Dictionary = GLOBAL_DATA.get_default_hold_binding()
 var direction_bindings: Dictionary = GLOBAL_DATA.get_default_direction_bindings()
 var controller_hold_binding: Dictionary = GLOBAL_DATA.get_default_controller_hold_binding()
@@ -73,6 +76,7 @@ func _ready() -> void:
 	show_arrows_toggle.toggled.connect(_on_show_arrows_toggled)
 	require_holding_toggle.toggled.connect(_on_require_holding_toggled)
 	audio_volume_slider.value_changed.connect(_on_audio_volume_changed)
+	touch_control_size_slider.value_changed.connect(_on_touch_control_size_changed)
 	reset_defaults_btn.pressed.connect(_on_reset_defaults_pressed)
 	web_hold_warning_label.meta_clicked.connect(_on_web_hold_warning_meta_clicked)
 	for slot_id in binding_buttons.keys():
@@ -161,6 +165,9 @@ func _apply_config(config: Dictionary) -> void:
 	audio_volume = clampf(float(config.get("audio_volume", audio_volume)), 0.0, 1.0)
 	show_stratagem_arrows = bool(config.get("show_stratagem_arrows", show_stratagem_arrows))
 	require_holding = bool(config.get("require_holding", require_holding))
+	touch_control_scale = GLOBAL_DATA.sanitize_touch_control_scale(
+		config.get("touch_control_scale", touch_control_scale)
+	)
 	hold_binding = GLOBAL_DATA.sanitize_input_binding(
 		config.get("hold_binding", hold_binding),
 		GLOBAL_DATA.get_default_hold_binding(),
@@ -187,7 +194,9 @@ func _sync_controls_from_state() -> void:
 	show_arrows_toggle.set_pressed_no_signal(show_stratagem_arrows)
 	require_holding_toggle.set_pressed_no_signal(require_holding)
 	audio_volume_slider.set_value_no_signal(audio_volume * 100.0)
+	touch_control_size_slider.set_value_no_signal(touch_control_scale * 100.0)
 	_update_volume_controls()
+	_update_touch_control_size_controls()
 	_update_binding_controls()
 
 
@@ -197,6 +206,7 @@ func _build_config() -> Dictionary:
 		"audio_volume": audio_volume,
 		"show_stratagem_arrows": show_stratagem_arrows,
 		"require_holding": require_holding,
+		"touch_control_scale": touch_control_scale,
 		"hold_binding": hold_binding.duplicate(true),
 		"direction_bindings": direction_bindings.duplicate(true),
 		"controller_hold_binding": controller_hold_binding.duplicate(true),
@@ -233,11 +243,18 @@ func _on_audio_volume_changed(value: float) -> void:
 	_emit_config_changed()
 
 
+func _on_touch_control_size_changed(value: float) -> void:
+	touch_control_scale = GLOBAL_DATA.sanitize_touch_control_scale(value / 100.0)
+	_update_touch_control_size_controls()
+	_emit_config_changed()
+
+
 func _on_reset_defaults_pressed() -> void:
 	_cancel_binding_capture(false)
 	randomize_mode = false
 	show_stratagem_arrows = GLOBAL_DATA.DEFAULT_SHOW_STRATAGEM_ARROWS
 	require_holding = GLOBAL_DATA.DEFAULT_REQUIRE_HOLD
+	touch_control_scale = GLOBAL_DATA.DEFAULT_TOUCH_CONTROL_SCALE
 	audio_volume = GLOBAL_DATA.DEFAULT_AUDIO_VOLUME
 	hold_binding = GLOBAL_DATA.get_default_hold_binding()
 	direction_bindings = GLOBAL_DATA.get_default_direction_bindings()
@@ -249,6 +266,10 @@ func _on_reset_defaults_pressed() -> void:
 
 func _update_volume_controls() -> void:
 	audio_volume_value_label.text = "%d%%" % int(round(audio_volume * 100.0))
+
+
+func _update_touch_control_size_controls() -> void:
+	touch_control_size_value_label.text = "%d%%" % int(round(touch_control_scale * 100.0))
 
 
 func _update_binding_controls() -> void:
@@ -423,7 +444,7 @@ func _on_web_hold_warning_meta_clicked(meta: Variant) -> void:
 
 func _apply_responsive_layout() -> void:
 	var viewport_size := get_viewport().get_visible_rect().size
-	var compact := viewport_size.x < 720.0
+	var compact := viewport_size.x < 720.0 or GLOBAL_DATA.is_touch_device()
 	panel_container.custom_minimum_size = Vector2(maxf(300.0, viewport_size.x - 20.0), 0) if compact else Vector2(980, 0)
 	var panel_gutter := 12 if compact else 30
 	for side in ["margin_left", "margin_top", "margin_right", "margin_bottom"]:

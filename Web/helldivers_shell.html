@@ -373,6 +373,43 @@
 
 	<script src="$GODOT_URL"></script>
 	<script>
+		let hd2DeferredInstallPrompt = null;
+
+		function hd2IsInstalled() {
+			return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+		}
+
+		window.addEventListener("beforeinstallprompt", function (event) {
+			event.preventDefault();
+			hd2DeferredInstallPrompt = event;
+		});
+
+		window.addEventListener("appinstalled", function () {
+			hd2DeferredInstallPrompt = null;
+		});
+
+		window.hd2GetInstallState = function () {
+			if (hd2IsInstalled()) {
+				return "installed";
+			}
+			return hd2DeferredInstallPrompt ? "ready" : "manual";
+		};
+
+		window.hd2InstallApp = function () {
+			if (hd2IsInstalled()) {
+				return "installed";
+			}
+			if (hd2DeferredInstallPrompt) {
+				hd2DeferredInstallPrompt.prompt();
+				hd2DeferredInstallPrompt.userChoice.finally(function () {
+					hd2DeferredInstallPrompt = null;
+				});
+				return "prompted";
+			}
+			window.alert("Brave has not offered an automatic install prompt yet. Open the browser menu or share sheet and choose 'Install app' or 'Add to Home screen'. Load the game online once before using it offline.");
+			return "manual";
+		};
+
 		const GODOT_CONFIG = $GODOT_CONFIG;
 		const GODOT_THREADS_ENABLED = false;
 		const engine = new Engine(GODOT_CONFIG);

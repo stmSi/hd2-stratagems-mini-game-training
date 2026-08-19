@@ -289,6 +289,15 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 10
 
+[node name="InstallOfflineBtn" type="Button" parent="PageMargin/RootLayout/ContentSplit/QueuePanel"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.929412, 0.760784, 1)
+theme_override_font_sizes/font_size = 18
+text = "Install Offline App"
+
 [node name="SettingsToggleBtn" type="Button" parent="PageMargin/RootLayout/ContentSplit/QueuePanel" unique_id=595208425]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 40)

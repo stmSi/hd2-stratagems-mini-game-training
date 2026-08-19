@@ -4,9 +4,9 @@ Practice/Training Mini-game for practicing Helldivers 2 stratagem input sequence
 
 Supports keyboard/mouse, controller, and mobile touch input. Keyboard and controller controls can be remapped.
 
-The Web export is an installable Progressive Web App. After loading it online once, add it to the device's Home Screen to keep the game available offline. Browser storage can still be cleared or evicted by the operating system, so offline availability is not permanent storage.
+The Web export is an installable Progressive Web App. Open the GitHub Pages version online once, then use **Install / Add Offline App** on the main screen. If Brave does not show its install prompt, open the browser menu or share sheet and choose **Install app** or **Add to Home screen**. GitHub release ZIP files are downloads; the installable app comes from the Pages URL. Browser storage can still be cleared or evicted by the operating system, so offline availability is not permanent storage.
 
-On phones and touch devices, the catalogue and practice queue use a compact stacked layout. Training shows a large four-way touch pad. When **Require Holding** is enabled, hold the gold **HOLD INPUT** button with one finger while tapping directions with another.
+On phones and touch devices, the catalogue and practice queue adapt to the screen orientation. Training places a large SVG four-way touch pad below the target in portrait and to the target's left in landscape. Adjust **Settings → General → Touch Buttons** from 80% to 180%. When **Require Holding** is enabled, hold the gold **HOLD INPUT** button with one finger while tapping directions with another.
 
 Includes the current developer-released catalogue through the June 2026 FRV variants and the April 2026 Exo Experts Warbond.
 

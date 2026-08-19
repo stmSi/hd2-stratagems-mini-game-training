@@ -5,6 +5,10 @@
 [ext_resource type="AudioStream" path="res://Assets/audio/tick_002.ogg" id="3_f0m2x"]
 [ext_resource type="AudioStream" path="res://Assets/audio/error_006.ogg" id="4_tk4v8"]
 [ext_resource type="AudioStream" path="res://Assets/audio/confirmation_003.ogg" id="5_tl0f4"]
+[ext_resource type="Texture2D" path="res://Assets/icons/Stratagem Arrow Up.svg" id="6_touch_up"]
+[ext_resource type="Texture2D" path="res://Assets/icons/Stratagem Arrow Left.svg" id="7_touch_left"]
+[ext_resource type="Texture2D" path="res://Assets/icons/Stratagem Arrow Down.svg" id="8_touch_down"]
+[ext_resource type="Texture2D" path="res://Assets/icons/Stratagem Arrow Right.svg" id="9_touch_right"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_oqvtn"]
 bg_color = Color(0.207843, 0.658824, 0.729412, 0.14)
@@ -278,37 +282,55 @@ size_flags_vertical = 4
 theme_override_font_sizes/font_size = 24
 text = "Queued Stratagem"
 
-[node name="StrategemBox" parent="MarginContainer/VBoxContainer/CenterContainer/Body" unique_id=1231085371 instance=ExtResource("2_lomod")]
+[node name="TrainingArea" type="BoxContainer" parent="MarginContainer/VBoxContainer/CenterContainer/Body"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 14
+alignment = 1
+vertical = true
+
+[node name="TargetColumn" type="VBoxContainer" parent="MarginContainer/VBoxContainer/CenterContainer/Body/TrainingArea"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="StrategemBox" parent="MarginContainer/VBoxContainer/CenterContainer/Body/TrainingArea/TargetColumn" unique_id=1231085371 instance=ExtResource("2_lomod")]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="StatusLabel" type="Label" parent="MarginContainer/VBoxContainer/CenterContainer/Body"]
+[node name="StatusLabel" type="Label" parent="MarginContainer/VBoxContainer/CenterContainer/Body/TrainingArea/TargetColumn"]
 unique_name_in_owner = true
 layout_mode = 2
 horizontal_alignment = 1
 theme_override_font_sizes/font_size = 24
 text = "Type the sequence."
 
-[node name="TouchControls" type="PanelContainer" parent="MarginContainer/VBoxContainer/CenterContainer/Body"]
+[node name="TouchControls" type="PanelContainer" parent="MarginContainer/VBoxContainer/CenterContainer/Body/TrainingArea"]
 unique_name_in_owner = true
 visible = false
 custom_minimum_size = Vector2(340, 0)
 layout_mode = 2
+size_flags_vertical = 4
 theme_override_styles/panel = SubResource("StyleBoxFlat_h1qsu")
 
-[node name="TouchMargin" type="MarginContainer" parent="MarginContainer/VBoxContainer/CenterContainer/Body/TouchControls"]
+[node name="TouchMargin" type="MarginContainer" parent="MarginContainer/VBoxContainer/CenterContainer/Body/TrainingArea/TouchControls"]
 layout_mode = 2
 theme_override_constants/margin_left = 12
 theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 12
 theme_override_constants/margin_bottom = 10
 
-[node name="TouchRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer/CenterContainer/Body/TouchControls/TouchMargin"]
+[node name="TouchRow" type="BoxContainer" parent="MarginContainer/VBoxContainer/CenterContainer/Body/TrainingArea/TouchControls/TouchMargin"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 12
 alignment = 1
 
-[node name="TouchHoldBtn" type="Button" parent="MarginContainer/VBoxContainer/CenterContainer/Body/TouchControls/TouchMargin/TouchRow"]
+[node name="TouchHoldBtn" type="Button" parent="MarginContainer/VBoxContainer/CenterContainer/Body/TrainingArea/TouchControls/TouchMargin/TouchRow"]
 unique_name_in_owner = true
 visible = false
 custom_minimum_size = Vector2(84, 132)
@@ -322,69 +344,80 @@ theme_override_styles/hover = SubResource("StyleBoxFlat_hold_normal")
 theme_override_styles/focus = SubResource("StyleBoxFlat_hold_normal")
 text = "HOLD\nINPUT"
 
-[node name="TouchDPad" type="GridContainer" parent="MarginContainer/VBoxContainer/CenterContainer/Body/TouchControls/TouchMargin/TouchRow"]
+[node name="TouchDPad" type="GridContainer" parent="MarginContainer/VBoxContainer/CenterContainer/Body/TrainingArea/TouchControls/TouchMargin/TouchRow"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/h_separation = 8
 theme_override_constants/v_separation = 8
 columns = 3
 
-[node name="TouchBlankLeft" type="Control" parent="MarginContainer/VBoxContainer/CenterContainer/Body/TouchControls/TouchMargin/TouchRow/TouchDPad"]
+[node name="TouchBlankLeft" type="Control" parent="MarginContainer/VBoxContainer/CenterContainer/Body/TrainingArea/TouchControls/TouchMargin/TouchRow/TouchDPad"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(68, 58)
 layout_mode = 2
 mouse_filter = 2
 
-[node name="TouchUpBtn" type="Button" parent="MarginContainer/VBoxContainer/CenterContainer/Body/TouchControls/TouchMargin/TouchRow/TouchDPad"]
+[node name="TouchUpBtn" type="Button" parent="MarginContainer/VBoxContainer/CenterContainer/Body/TrainingArea/TouchControls/TouchMargin/TouchRow/TouchDPad"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(68, 58)
 layout_mode = 2
 focus_mode = 0
-theme_override_font_sizes/font_size = 30
 theme_override_styles/normal = SubResource("StyleBoxFlat_touch_normal")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_touch_pressed")
 theme_override_styles/hover = SubResource("StyleBoxFlat_touch_normal")
 theme_override_styles/focus = SubResource("StyleBoxFlat_touch_normal")
-text = "↑"
+icon = ExtResource("6_touch_up")
+expand_icon = true
+icon_alignment = 1
+vertical_icon_alignment = 1
 
-[node name="TouchBlankRight" type="Control" parent="MarginContainer/VBoxContainer/CenterContainer/Body/TouchControls/TouchMargin/TouchRow/TouchDPad"]
+[node name="TouchBlankRight" type="Control" parent="MarginContainer/VBoxContainer/CenterContainer/Body/TrainingArea/TouchControls/TouchMargin/TouchRow/TouchDPad"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(68, 58)
 layout_mode = 2
 mouse_filter = 2
 
-[node name="TouchLeftBtn" type="Button" parent="MarginContainer/VBoxContainer/CenterContainer/Body/TouchControls/TouchMargin/TouchRow/TouchDPad"]
+[node name="TouchLeftBtn" type="Button" parent="MarginContainer/VBoxContainer/CenterContainer/Body/TrainingArea/TouchControls/TouchMargin/TouchRow/TouchDPad"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(68, 58)
 layout_mode = 2
 focus_mode = 0
-theme_override_font_sizes/font_size = 30
 theme_override_styles/normal = SubResource("StyleBoxFlat_touch_normal")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_touch_pressed")
 theme_override_styles/hover = SubResource("StyleBoxFlat_touch_normal")
 theme_override_styles/focus = SubResource("StyleBoxFlat_touch_normal")
-text = "←"
+icon = ExtResource("7_touch_left")
+expand_icon = true
+icon_alignment = 1
+vertical_icon_alignment = 1
 
-[node name="TouchDownBtn" type="Button" parent="MarginContainer/VBoxContainer/CenterContainer/Body/TouchControls/TouchMargin/TouchRow/TouchDPad"]
+[node name="TouchDownBtn" type="Button" parent="MarginContainer/VBoxContainer/CenterContainer/Body/TrainingArea/TouchControls/TouchMargin/TouchRow/TouchDPad"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(68, 58)
 layout_mode = 2
 focus_mode = 0
-theme_override_font_sizes/font_size = 30
 theme_override_styles/normal = SubResource("StyleBoxFlat_touch_normal")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_touch_pressed")
 theme_override_styles/hover = SubResource("StyleBoxFlat_touch_normal")
 theme_override_styles/focus = SubResource("StyleBoxFlat_touch_normal")
-text = "↓"
+icon = ExtResource("8_touch_down")
+expand_icon = true
+icon_alignment = 1
+vertical_icon_alignment = 1
 
-[node name="TouchRightBtn" type="Button" parent="MarginContainer/VBoxContainer/CenterContainer/Body/TouchControls/TouchMargin/TouchRow/TouchDPad"]
+[node name="TouchRightBtn" type="Button" parent="MarginContainer/VBoxContainer/CenterContainer/Body/TrainingArea/TouchControls/TouchMargin/TouchRow/TouchDPad"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(68, 58)
 layout_mode = 2
 focus_mode = 0
-theme_override_font_sizes/font_size = 30
 theme_override_styles/normal = SubResource("StyleBoxFlat_touch_normal")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_touch_pressed")
 theme_override_styles/hover = SubResource("StyleBoxFlat_touch_normal")
 theme_override_styles/focus = SubResource("StyleBoxFlat_touch_normal")
-text = "→"
+icon = ExtResource("9_touch_right")
+expand_icon = true
+icon_alignment = 1
+vertical_icon_alignment = 1
 
 [node name="StatsPanel" type="PanelContainer" parent="MarginContainer/VBoxContainer/CenterContainer/Body"]
 unique_name_in_owner = true

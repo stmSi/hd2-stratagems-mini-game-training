@@ -154,6 +154,33 @@ theme_override_font_sizes/font_size = 18
 text = "70%"
 horizontal_alignment = 2
 
+[node name="TouchControlSizeRow" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsTabs/GeneralTab"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="TouchControlSizeLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsTabs/GeneralTab/TouchControlSizeRow"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Touch Buttons"
+
+[node name="TouchControlSizeSlider" type="HSlider" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsTabs/GeneralTab/TouchControlSizeRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 80.0
+max_value = 180.0
+step = 5.0
+value = 150.0
+
+[node name="TouchControlSizeValueLabel" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsTabs/GeneralTab/TouchControlSizeRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(62, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "150%"
+horizontal_alignment = 2
+
 [node name="ResetDefaultsBtn" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/SettingsTabs/GeneralTab" unique_id=85292915]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 44)

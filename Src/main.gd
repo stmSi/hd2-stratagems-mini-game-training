@@ -12,6 +12,7 @@ const CUSTOM_STRATAGEM_DIALOG_SCENE = preload("res://Src/custom_stratagem_dialog
 @onready var search_clear_btn: Button = %SearchClearBtn
 @onready var custom_stratagems_btn: Button = %CustomStratagemsBtn
 @onready var github_link_btn: LinkButton = %GithubLinkBtn
+@onready var install_offline_btn: Button = %InstallOfflineBtn
 @onready var settings_toggle_btn: Button = %SettingsToggleBtn
 @onready var clear_reset_btn: Button = %ClearResetBtn
 @onready var train_btn: Button = %TrainBtn
@@ -31,12 +32,14 @@ var randomize_mode := false
 var audio_volume := GLOBAL_DATA.DEFAULT_AUDIO_VOLUME
 var show_stratagem_arrows := GLOBAL_DATA.DEFAULT_SHOW_STRATAGEM_ARROWS
 var require_holding := GLOBAL_DATA.DEFAULT_REQUIRE_HOLD
+var touch_control_scale := GLOBAL_DATA.DEFAULT_TOUCH_CONTROL_SCALE
 var hold_binding: Dictionary = GLOBAL_DATA.get_default_hold_binding()
 var direction_bindings: Dictionary = GLOBAL_DATA.get_default_direction_bindings()
 var controller_hold_binding: Dictionary = GLOBAL_DATA.get_default_controller_hold_binding()
 var controller_direction_bindings: Dictionary = GLOBAL_DATA.get_default_controller_direction_bindings()
 var practice_stats: Dictionary = {}
 var compact_mode := false
+var stacked_mode := false
 var catalogue_columns := 8
 
 
@@ -53,12 +56,14 @@ func _ready() -> void:
 	search_clear_btn.pressed.connect(_on_search_clear_pressed)
 	custom_stratagems_btn.pressed.connect(_on_custom_stratagems_pressed)
 	github_link_btn.pressed.connect(_on_github_link_pressed)
+	install_offline_btn.pressed.connect(_on_install_offline_pressed)
 	settings_toggle_btn.pressed.connect(_on_settings_pressed)
 	clear_reset_btn.pressed.connect(_on_clear_saved_pressed)
 	train_btn.pressed.connect(_on_train_pressed)
 	_populate_stratagem_list()
 	_refresh_saved_stratagems()
 	_update_action_buttons()
+	_update_install_offline_button()
 
 
 func _setup_settings_popup() -> void:
@@ -81,6 +86,7 @@ func _build_settings_config() -> Dictionary:
 		"audio_volume": audio_volume,
 		"show_stratagem_arrows": show_stratagem_arrows,
 		"require_holding": require_holding,
+		"touch_control_scale": touch_control_scale,
 		"hold_binding": hold_binding.duplicate(true),
 		"direction_bindings": direction_bindings.duplicate(true),
 		"controller_hold_binding": controller_hold_binding.duplicate(true),
@@ -94,6 +100,9 @@ func _apply_settings_config(config: Dictionary) -> void:
 	audio_volume = clampf(float(config.get("audio_volume", audio_volume)), 0.0, 1.0)
 	show_stratagem_arrows = bool(config.get("show_stratagem_arrows", show_stratagem_arrows))
 	require_holding = bool(config.get("require_holding", require_holding))
+	touch_control_scale = GLOBAL_DATA.sanitize_touch_control_scale(
+		config.get("touch_control_scale", touch_control_scale)
+	)
 	hold_binding = GLOBAL_DATA.sanitize_input_binding(
 		config.get("hold_binding", hold_binding),
 		GLOBAL_DATA.get_default_hold_binding(),
@@ -244,6 +253,38 @@ func _on_github_link_pressed() -> void:
 		push_warning("Failed to open GitHub link: %s" % err)
 
 
+func _on_install_offline_pressed() -> void:
+	if not OS.has_feature("web"):
+		return
+	var result := str(JavaScriptBridge.eval(
+		"window.hd2InstallApp ? window.hd2InstallApp() : 'manual'",
+		true
+	))
+	match result:
+		"installed":
+			install_offline_btn.visible = false
+		"prompted":
+			install_offline_btn.text = "Install Prompt Opened"
+		_:
+			install_offline_btn.text = "Install: Use Brave Menu"
+
+
+func _update_install_offline_button() -> void:
+	install_offline_btn.visible = OS.has_feature("web")
+	if not install_offline_btn.visible:
+		return
+	var state := str(JavaScriptBridge.eval(
+		"window.hd2GetInstallState ? window.hd2GetInstallState() : 'manual'",
+		true
+	))
+	if state == "installed":
+		install_offline_btn.visible = false
+	elif state == "ready":
+		install_offline_btn.text = "Install Offline App"
+	else:
+		install_offline_btn.text = "Install / Add Offline App"
+
+
 func _on_settings_pressed() -> void:
 	if not settings_popup:
 		return
@@ -317,15 +358,21 @@ func _on_viewport_size_changed() -> void:
 
 
 func _apply_responsive_layout(force := false) -> void:
-	var viewport_width := get_viewport().get_visible_rect().size.x
-	var next_compact_mode := viewport_width < 720.0
+	var viewport_size := get_viewport().get_visible_rect().size
+	var viewport_width := viewport_size.x
+	var touchscreen_available := GLOBAL_DATA.is_touch_device()
+	var next_compact_mode := viewport_width < 720.0 or viewport_size.y < 650.0 or touchscreen_available
+	var next_stacked_mode := viewport_width < 720.0 and viewport_width <= viewport_size.y
 	var next_columns := 8
-	if next_compact_mode:
+	if next_stacked_mode:
 		next_columns = clampi(int(floor((viewport_width - 42.0) / 82.0)), 3, 4)
+	elif next_compact_mode:
+		next_columns = 5
 
-	var layout_changed := force or next_compact_mode != compact_mode
+	var layout_changed := force or next_compact_mode != compact_mode or next_stacked_mode != stacked_mode
 	var columns_changed := force or next_columns != catalogue_columns
 	compact_mode = next_compact_mode
+	stacked_mode = next_stacked_mode
 	catalogue_columns = next_columns
 
 	var page_gutter := 10 if compact_mode else 20
@@ -333,9 +380,14 @@ func _apply_responsive_layout(force := false) -> void:
 		page_margin.add_theme_constant_override(side, page_gutter)
 	root_layout.add_theme_constant_override("separation", 10 if compact_mode else 18)
 	search_row.add_theme_constant_override("separation", 6 if compact_mode else 12)
-	content_split.vertical = compact_mode
+	content_split.vertical = stacked_mode
 	content_split.add_theme_constant_override("separation", 10 if compact_mode else 0)
-	queue_panel.custom_minimum_size = Vector2(0, 270) if compact_mode else Vector2(420, 0)
+	if stacked_mode:
+		queue_panel.custom_minimum_size = Vector2(0, 270)
+	elif compact_mode:
+		queue_panel.custom_minimum_size = Vector2(320, 0)
+	else:
+		queue_panel.custom_minimum_size = Vector2(420, 0)
 	queue_panel.add_theme_constant_override("separation", 8 if compact_mode else 12)
 	action_row.add_theme_constant_override("separation", 10 if compact_mode else 50)
 
@@ -373,6 +425,7 @@ func _load_user_config() -> void:
 	audio_volume = config["audio_volume"]
 	show_stratagem_arrows = config["show_stratagem_arrows"]
 	require_holding = config["require_holding"]
+	touch_control_scale = config["touch_control_scale"]
 	hold_binding = config["hold_binding"]
 	direction_bindings = config["direction_bindings"]
 	controller_hold_binding = config["controller_hold_binding"]
@@ -387,6 +440,7 @@ func _save_user_config() -> void:
 		audio_volume,
 		show_stratagem_arrows,
 		require_holding,
+		touch_control_scale,
 		hold_binding,
 		direction_bindings,
 		controller_hold_binding,

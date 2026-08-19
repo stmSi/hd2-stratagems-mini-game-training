@@ -5,6 +5,7 @@ const SETTINGS_POPUP_SCENE = preload("res://Src/settings_popup.tscn")
 const CORRECT_SFX_BASE_DB := -8.0
 const FAIL_SFX_BASE_DB := -4.5
 const SUCCESS_SFX_BASE_DB := -3.0
+const TOUCH_BUTTON_BASE_SIZE := 72.0
 
 @onready var back_btn: Button = %BackBtn
 @onready var github_link_btn: LinkButton = %GithubLinkBtn
@@ -27,8 +28,14 @@ const SUCCESS_SFX_BASE_DB := -3.0
 @onready var header: HBoxContainer = %Header
 @onready var body: VBoxContainer = %Body
 @onready var title_label: Label = %TitleLabel
+@onready var training_area: BoxContainer = %TrainingArea
+@onready var target_column: VBoxContainer = %TargetColumn
 @onready var touch_controls: PanelContainer = %TouchControls
+@onready var touch_row: BoxContainer = %TouchRow
+@onready var touch_dpad: GridContainer = %TouchDPad
 @onready var touch_hold_btn: Button = %TouchHoldBtn
+@onready var touch_blank_left: Control = %TouchBlankLeft
+@onready var touch_blank_right: Control = %TouchBlankRight
 @onready var touch_up_btn: Button = %TouchUpBtn
 @onready var touch_left_btn: Button = %TouchLeftBtn
 @onready var touch_down_btn: Button = %TouchDownBtn
@@ -44,6 +51,7 @@ var randomize_mode := false
 var audio_volume := GLOBAL_DATA.DEFAULT_AUDIO_VOLUME
 var show_stratagem_arrows := GLOBAL_DATA.DEFAULT_SHOW_STRATAGEM_ARROWS
 var require_holding := GLOBAL_DATA.DEFAULT_REQUIRE_HOLD
+var touch_control_scale := GLOBAL_DATA.DEFAULT_TOUCH_CONTROL_SCALE
 var hold_binding: Dictionary = GLOBAL_DATA.get_default_hold_binding()
 var direction_bindings: Dictionary = GLOBAL_DATA.get_default_direction_bindings()
 var controller_hold_binding: Dictionary = GLOBAL_DATA.get_default_controller_hold_binding()
@@ -58,6 +66,7 @@ var attempt_started_at_msec := 0
 var rng := RandomNumberGenerator.new()
 var compact_mode := false
 var touch_layout := false
+var touch_landscape := false
 var touch_hold_active := false
 
 
@@ -179,6 +188,7 @@ func _build_settings_config() -> Dictionary:
 		"audio_volume": audio_volume,
 		"show_stratagem_arrows": show_stratagem_arrows,
 		"require_holding": require_holding,
+		"touch_control_scale": touch_control_scale,
 		"hold_binding": hold_binding.duplicate(true),
 		"direction_bindings": direction_bindings.duplicate(true),
 		"controller_hold_binding": controller_hold_binding.duplicate(true),
@@ -192,6 +202,9 @@ func _apply_settings_config(config: Dictionary) -> void:
 	audio_volume = clampf(float(config.get("audio_volume", audio_volume)), 0.0, 1.0)
 	show_stratagem_arrows = bool(config.get("show_stratagem_arrows", show_stratagem_arrows))
 	require_holding = bool(config.get("require_holding", require_holding))
+	touch_control_scale = GLOBAL_DATA.sanitize_touch_control_scale(
+		config.get("touch_control_scale", touch_control_scale)
+	)
 	hold_binding = GLOBAL_DATA.sanitize_input_binding(
 		config.get("hold_binding", hold_binding),
 		GLOBAL_DATA.get_default_hold_binding(),
@@ -214,6 +227,7 @@ func _apply_settings_config(config: Dictionary) -> void:
 	_update_mode_label()
 	_apply_show_arrows_setting()
 	_update_touch_hold_control()
+	_apply_touch_control_size()
 	_update_controls_hint()
 	_refresh_hold_feedback(true)
 	if previous_randomize_mode != randomize_mode:
@@ -251,6 +265,7 @@ func _load_config() -> void:
 	audio_volume = config["audio_volume"]
 	show_stratagem_arrows = config["show_stratagem_arrows"]
 	require_holding = config["require_holding"]
+	touch_control_scale = config["touch_control_scale"]
 	hold_binding = config["hold_binding"]
 	direction_bindings = config["direction_bindings"]
 	controller_hold_binding = config["controller_hold_binding"]
@@ -478,6 +493,7 @@ func _save_user_config() -> void:
 		audio_volume,
 		show_stratagem_arrows,
 		require_holding,
+		touch_control_scale,
 		hold_binding,
 		direction_bindings,
 		controller_hold_binding,
@@ -626,23 +642,31 @@ func _on_viewport_size_changed() -> void:
 
 
 func _apply_responsive_layout(force := false) -> void:
-	var viewport_width := get_viewport().get_visible_rect().size.x
-	var next_compact_mode := viewport_width < 720.0
-	var next_touch_layout := next_compact_mode or DisplayServer.is_touchscreen_available()
-	if not force and next_compact_mode == compact_mode and next_touch_layout == touch_layout:
+	var viewport_size := get_viewport().get_visible_rect().size
+	var touchscreen_available := GLOBAL_DATA.is_touch_device()
+	var next_compact_mode := viewport_size.x < 720.0 or viewport_size.y < 650.0 or touchscreen_available
+	var next_touch_layout := next_compact_mode or touchscreen_available
+	var next_touch_landscape := next_touch_layout and viewport_size.x > viewport_size.y
+	if (
+		not force
+		and next_compact_mode == compact_mode
+		and next_touch_layout == touch_layout
+		and next_touch_landscape == touch_landscape
+	):
 		return
 
 	compact_mode = next_compact_mode
 	touch_layout = next_touch_layout
+	touch_landscape = next_touch_landscape
 	var page_gutter := 10 if compact_mode else 24
 	for side in ["margin_left", "margin_top", "margin_right", "margin_bottom"]:
 		page_margin.add_theme_constant_override(side, page_gutter)
 	root_layout.add_theme_constant_override("separation", 10 if compact_mode else 24)
 	header.add_theme_constant_override("separation", 6 if compact_mode else 0)
-	body.add_theme_constant_override("separation", 10 if touch_layout else 20)
+	body.add_theme_constant_override("separation", 7 if touch_landscape else (10 if touch_layout else 20))
 	body.custom_minimum_size = Vector2(0, 0)
-	title_label.add_theme_font_size_override("font_size", 30 if compact_mode else 42)
-	hint_label.add_theme_font_size_override("font_size", 15 if compact_mode else 20)
+	title_label.add_theme_font_size_override("font_size", 24 if touch_landscape else (30 if compact_mode else 42))
+	hint_label.add_theme_font_size_override("font_size", 13 if touch_landscape else (15 if compact_mode else 20))
 	hint_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	hint_label.custom_minimum_size = Vector2(340, 0) if compact_mode else Vector2(0, 0)
 	status_label.add_theme_font_size_override("font_size", 19 if compact_mode else 24)
@@ -650,11 +674,17 @@ func _apply_responsive_layout(force := false) -> void:
 	settings_btn.custom_minimum_size = Vector2(104, 48) if compact_mode else Vector2(124, 44)
 	github_link_btn.visible = not compact_mode
 	mode_label.visible = not compact_mode
+	training_area.vertical = not touch_landscape
+	touch_row.vertical = not touch_landscape
+	training_area.move_child(touch_controls, 0 if touch_landscape else 1)
+	target_column.custom_minimum_size = Vector2(300, 0) if touch_landscape else Vector2.ZERO
+	target_column.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	touch_controls.visible = touch_layout and not trainable_strat_ids.is_empty()
 	next_up_panel.custom_minimum_size = Vector2(0, 0) if compact_mode else Vector2(860, 0)
 	stats_panel.custom_minimum_size = Vector2(0, 0) if compact_mode else Vector2(860, 200)
 	stats_panel.visible = not touch_layout and not trainable_strat_ids.is_empty()
 	strategem_box.set_compact_mode(compact_mode)
+	_apply_touch_control_size()
 	_update_touch_hold_control()
 	_update_controls_hint()
 	_refresh_next_preview()
@@ -664,3 +694,38 @@ func _update_touch_hold_control() -> void:
 	touch_hold_btn.visible = touch_layout and require_holding
 	if not require_holding:
 		touch_hold_active = false
+	_apply_touch_control_size()
+
+
+func _apply_touch_control_size() -> void:
+	if not is_node_ready():
+		return
+
+	var viewport_size := get_viewport().get_visible_rect().size
+	var gap := clampi(int(round(8.0 * touch_control_scale)), 7, 13)
+	var desired_size := TOUCH_BUTTON_BASE_SIZE * touch_control_scale
+	var available_button_size: float
+	if touch_landscape:
+		available_button_size = maxf(64.0, (viewport_size.y - 158.0 - gap) / 2.0)
+	else:
+		available_button_size = maxf(58.0, (viewport_size.x - 44.0 - (gap * 2.0)) / 3.0)
+	var button_size := floorf(minf(desired_size, available_button_size))
+	var button_minimum := Vector2(button_size, button_size)
+
+	for control in [touch_blank_left, touch_blank_right, touch_up_btn, touch_left_btn, touch_down_btn, touch_right_btn]:
+		control.custom_minimum_size = button_minimum
+	touch_dpad.add_theme_constant_override("h_separation", gap)
+	touch_dpad.add_theme_constant_override("v_separation", gap)
+	touch_row.add_theme_constant_override("separation", gap)
+
+	if touch_landscape:
+		touch_hold_btn.custom_minimum_size = Vector2(maxf(88.0, button_size * 0.82), button_size * 2.0 + gap)
+		touch_hold_btn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		touch_controls.custom_minimum_size = Vector2(
+			button_size * 3.0 + gap * 2.0 + 24.0 + (touch_hold_btn.custom_minimum_size.x + gap if require_holding else 0.0),
+			0
+		)
+	else:
+		touch_hold_btn.custom_minimum_size = Vector2(0, maxf(68.0, button_size * 0.66))
+		touch_hold_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		touch_controls.custom_minimum_size = Vector2(button_size * 3.0 + gap * 2.0 + 24.0, 0)
