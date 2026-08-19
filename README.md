@@ -2,7 +2,11 @@
 
 Practice/Training Mini-game for practicing Helldivers 2 stratagem input sequences.
 
-Supports keyboard/mouse and controller input, with remapping for both.
+Supports keyboard/mouse, controller, and mobile touch input. Keyboard and controller controls can be remapped.
+
+The Web export is an installable Progressive Web App. After loading it online once, add it to the device's Home Screen to keep the game available offline. Browser storage can still be cleared or evicted by the operating system, so offline availability is not permanent storage.
+
+On phones and touch devices, the catalogue and practice queue use a compact stacked layout. Training shows a large four-way touch pad. When **Require Holding** is enabled, hold the gold **HOLD INPUT** button with one finger while tapping directions with another.
 
 Includes the current developer-released catalogue through the June 2026 FRV variants and the April 2026 Exo Experts Warbond.
 

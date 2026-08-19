@@ -15,6 +15,13 @@ const CUSTOM_STRATAGEM_DIALOG_SCENE = preload("res://Src/custom_stratagem_dialog
 @onready var settings_toggle_btn: Button = %SettingsToggleBtn
 @onready var clear_reset_btn: Button = %ClearResetBtn
 @onready var train_btn: Button = %TrainBtn
+@onready var page_margin: MarginContainer = %PageMargin
+@onready var root_layout: VBoxContainer = %RootLayout
+@onready var search_row: HBoxContainer = %SearchRow
+@onready var content_split: BoxContainer = %ContentSplit
+@onready var list_of_strats_padding: MarginContainer = %ListOfStratsPadding
+@onready var queue_panel: VBoxContainer = %QueuePanel
+@onready var action_row: HBoxContainer = %ActionRow
 
 var settings_popup: Control
 var custom_stratagem_dialog: Window
@@ -29,11 +36,15 @@ var direction_bindings: Dictionary = GLOBAL_DATA.get_default_direction_bindings(
 var controller_hold_binding: Dictionary = GLOBAL_DATA.get_default_controller_hold_binding()
 var controller_direction_bindings: Dictionary = GLOBAL_DATA.get_default_controller_direction_bindings()
 var practice_stats: Dictionary = {}
+var compact_mode := false
+var catalogue_columns := 8
 
 
 func _ready() -> void:
 	GLOBAL_DATA.load_custom_stratagems()
 	_load_user_config()
+	_apply_responsive_layout(true)
+	get_viewport().size_changed.connect(_on_viewport_size_changed)
 	_setup_settings_popup()
 	_setup_custom_stratagem_dialog()
 	search_input.text = search_query
@@ -139,14 +150,16 @@ func _add_category_section(category: String, strat_ids: Array) -> void:
 	list_of_strats.add_child(label)
 
 	var grid := GridContainer.new()
-	grid.columns = 8
+	grid.columns = catalogue_columns
 	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	grid.add_theme_constant_override("h_separation", 22)
-	grid.add_theme_constant_override("v_separation", 22)
+	grid.add_theme_constant_override("h_separation", 10 if compact_mode else 22)
+	grid.add_theme_constant_override("v_separation", 14 if compact_mode else 22)
 	list_of_strats.add_child(grid)
 
 	for strat_id in strat_ids:
 		var icon = STRAT_ICON_SCENE.instantiate()
+		if compact_mode:
+			icon.custom_minimum_size = Vector2(72, 72)
 		icon.set_stratagem(strat_id)
 		icon.set_selected(user_strat_list.has(strat_id))
 		icon.set_show_stratagem_arrows(show_stratagem_arrows)
@@ -297,6 +310,52 @@ func _update_search_controls() -> void:
 func _update_action_buttons() -> void:
 	clear_reset_btn.disabled = user_strat_list.is_empty()
 	train_btn.disabled = GLOBAL_DATA.get_trainable_strat_ids(user_strat_list).is_empty()
+
+
+func _on_viewport_size_changed() -> void:
+	_apply_responsive_layout()
+
+
+func _apply_responsive_layout(force := false) -> void:
+	var viewport_width := get_viewport().get_visible_rect().size.x
+	var next_compact_mode := viewport_width < 720.0
+	var next_columns := 8
+	if next_compact_mode:
+		next_columns = clampi(int(floor((viewport_width - 42.0) / 82.0)), 3, 4)
+
+	var layout_changed := force or next_compact_mode != compact_mode
+	var columns_changed := force or next_columns != catalogue_columns
+	compact_mode = next_compact_mode
+	catalogue_columns = next_columns
+
+	var page_gutter := 10 if compact_mode else 20
+	for side in ["margin_left", "margin_top", "margin_right", "margin_bottom"]:
+		page_margin.add_theme_constant_override(side, page_gutter)
+	root_layout.add_theme_constant_override("separation", 10 if compact_mode else 18)
+	search_row.add_theme_constant_override("separation", 6 if compact_mode else 12)
+	content_split.vertical = compact_mode
+	content_split.add_theme_constant_override("separation", 10 if compact_mode else 0)
+	queue_panel.custom_minimum_size = Vector2(0, 270) if compact_mode else Vector2(420, 0)
+	queue_panel.add_theme_constant_override("separation", 8 if compact_mode else 12)
+	action_row.add_theme_constant_override("separation", 10 if compact_mode else 50)
+
+	search_clear_btn.custom_minimum_size = Vector2(64, 48) if compact_mode else Vector2(100, 42)
+	custom_stratagems_btn.custom_minimum_size = Vector2(112, 48) if compact_mode else Vector2(190, 42)
+	custom_stratagems_btn.text = "+ Custom" if compact_mode else "+ Custom Stratagem"
+	github_link_btn.visible = not compact_mode
+	clear_reset_btn.custom_minimum_size = Vector2(0, 54) if compact_mode else Vector2(140, 60)
+	clear_reset_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL if compact_mode else Control.SIZE_SHRINK_CENTER
+	train_btn.custom_minimum_size = Vector2(0, 58) if compact_mode else Vector2(184, 64)
+	train_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL if compact_mode else Control.SIZE_SHRINK_CENTER
+
+	var catalogue_gutter := 6 if compact_mode else 30
+	list_of_strats_padding.add_theme_constant_override("margin_left", catalogue_gutter)
+	list_of_strats_padding.add_theme_constant_override("margin_right", catalogue_gutter if compact_mode else 22)
+	list_of_strats_padding.add_theme_constant_override("margin_top", 10 if compact_mode else 18)
+	list_of_strats_padding.add_theme_constant_override("margin_bottom", 10 if compact_mode else 18)
+
+	if is_node_ready() and list_of_strats.get_child_count() > 0 and (layout_changed or columns_changed):
+		_populate_stratagem_list()
 
 
 func _clear_container(container: Node) -> void:

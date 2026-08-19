@@ -24,12 +24,14 @@ var editing_strat_id := ""
 var pending_icon_bytes := PackedByteArray()
 var pending_icon_file_name := ""
 var _web_upload_callback: Variant
+var compact_mode := false
 
 
 func _ready() -> void:
 	title = "Player-created Stratagems"
-	min_size = Vector2i(560, 620)
-	size = DIALOG_SIZE
+	compact_mode = get_tree().root.get_visible_rect().size.x < 720.0
+	min_size = Vector2i(300, 560) if compact_mode else Vector2i(560, 620)
+	size = _get_dialog_size()
 	transient = true
 	exclusive = false
 	close_requested.connect(hide)
@@ -48,16 +50,30 @@ func open_for(strat_id := "") -> void:
 		_start_new_stratagem()
 	else:
 		_load_stratagem(strat_id)
-	popup_centered(DIALOG_SIZE)
+	var target_size := _get_dialog_size()
+	popup_centered()
+	size = target_size
+	position = Vector2i((get_tree().root.size - target_size) / 2)
+
+
+func _get_dialog_size() -> Vector2i:
+	var viewport_size := Vector2i(get_tree().root.get_visible_rect().size)
+	if viewport_size.x < 720:
+		return Vector2i(
+			clampi(viewport_size.x - 16, 300, DIALOG_SIZE.x),
+			clampi(viewport_size.y - 20, 560, DIALOG_SIZE.y)
+		)
+	return DIALOG_SIZE
 
 
 func _build_ui() -> void:
 	var margin := MarginContainer.new()
 	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	margin.add_theme_constant_override("margin_left", 24)
-	margin.add_theme_constant_override("margin_top", 20)
-	margin.add_theme_constant_override("margin_right", 24)
-	margin.add_theme_constant_override("margin_bottom", 20)
+	var dialog_gutter := 12 if compact_mode else 24
+	margin.add_theme_constant_override("margin_left", dialog_gutter)
+	margin.add_theme_constant_override("margin_top", 12 if compact_mode else 20)
+	margin.add_theme_constant_override("margin_right", dialog_gutter)
+	margin.add_theme_constant_override("margin_bottom", 12 if compact_mode else 20)
 	add_child(margin)
 
 	var content := VBoxContainer.new()
@@ -66,7 +82,8 @@ func _build_ui() -> void:
 
 	var heading := Label.new()
 	heading.text = "PLAYER-CREATED STRATAGEMS"
-	heading.add_theme_font_size_override("font_size", 26)
+	heading.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	heading.add_theme_font_size_override("font_size", 21 if compact_mode else 26)
 	heading.add_theme_color_override("font_color", Color("ffd27e"))
 	content.add_child(heading)
 
@@ -85,7 +102,7 @@ func _build_ui() -> void:
 
 	var form := GridContainer.new()
 	form.columns = 2
-	form.add_theme_constant_override("h_separation", 16)
+	form.add_theme_constant_override("h_separation", 8 if compact_mode else 16)
 	form.add_theme_constant_override("v_separation", 12)
 	content.add_child(form)
 
@@ -120,12 +137,13 @@ func _build_ui() -> void:
 	icon_label.vertical_alignment = VERTICAL_ALIGNMENT_TOP
 	form.add_child(icon_label)
 
-	var icon_row := HBoxContainer.new()
+	var icon_row := BoxContainer.new()
+	icon_row.vertical = compact_mode
 	icon_row.add_theme_constant_override("separation", 14)
 	form.add_child(icon_row)
 
 	icon_preview = TextureRect.new()
-	icon_preview.custom_minimum_size = Vector2(108, 108)
+	icon_preview.custom_minimum_size = Vector2(82, 82) if compact_mode else Vector2(108, 108)
 	icon_preview.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	icon_preview.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	icon_row.add_child(icon_preview)
@@ -178,13 +196,13 @@ func _build_ui() -> void:
 
 	var cancel_btn := Button.new()
 	cancel_btn.text = "Close"
-	cancel_btn.custom_minimum_size = Vector2(100, 42)
+	cancel_btn.custom_minimum_size = Vector2(74, 42) if compact_mode else Vector2(100, 42)
 	cancel_btn.pressed.connect(hide)
 	actions.add_child(cancel_btn)
 
 	save_btn = Button.new()
 	save_btn.text = "Save Stratagem"
-	save_btn.custom_minimum_size = Vector2(160, 42)
+	save_btn.custom_minimum_size = Vector2(128, 42) if compact_mode else Vector2(160, 42)
 	save_btn.pressed.connect(_on_save_pressed)
 	actions.add_child(save_btn)
 
@@ -192,7 +210,7 @@ func _build_ui() -> void:
 func _make_form_label(text_value: String) -> Label:
 	var label := Label.new()
 	label.text = text_value
-	label.custom_minimum_size = Vector2(112, 36)
+	label.custom_minimum_size = Vector2(84, 36) if compact_mode else Vector2(112, 36)
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	return label
 

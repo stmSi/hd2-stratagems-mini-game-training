@@ -1,9 +1,11 @@
-extends HBoxContainer
+extends BoxContainer
 class_name StrategemBox
 
 @onready var strategem_icon: TextureRect = %StrategemIcon
 @onready var strategem_name: Label = %StrategemName
-@onready var strategem_codes: HBoxContainer = %StrategemCodes
+@onready var strategem_codes: HFlowContainer = %StrategemCodes
+@onready var strategem_info: HBoxContainer = %StrategemInfo
+@onready var details: VBoxContainer = %Details
 
 const ARROW_CODE_ICON = preload("uid://bs2ww5vda85fw")
 @export var strat_id := ""
@@ -12,6 +14,7 @@ const ARROW_CODE_ICON = preload("uid://bs2ww5vda85fw")
 var strat_data: Dictionary = {}
 var arrow_icons: Array[ArrowCodeIcon] = []
 var base_scale := Vector2.ONE
+var compact_mode := false
 
 func _ready() -> void:
 	base_scale = scale
@@ -45,6 +48,23 @@ func set_show_sequence(value: bool) -> void:
 		strategem_codes.visible = show_sequence
 
 
+func set_compact_mode(value: bool) -> void:
+	compact_mode = value
+	vertical = compact_mode
+	alignment = BoxContainer.ALIGNMENT_CENTER
+	add_theme_constant_override("separation", 8 if compact_mode else 20)
+	strategem_info.alignment = BoxContainer.ALIGNMENT_CENTER
+	strategem_icon.custom_minimum_size = Vector2(68, 68) if compact_mode else Vector2(100, 100)
+	details.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	strategem_name.add_theme_font_size_override("font_size", 28 if compact_mode else 48)
+	strategem_name.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER if compact_mode else HORIZONTAL_ALIGNMENT_LEFT
+	strategem_name.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART if compact_mode else TextServer.AUTOWRAP_OFF
+	strategem_codes.alignment = FlowContainer.ALIGNMENT_CENTER if compact_mode else FlowContainer.ALIGNMENT_BEGIN
+	strategem_codes.add_theme_constant_override("h_separation", 5 if compact_mode else 20)
+	strategem_codes.add_theme_constant_override("v_separation", 5 if compact_mode else 0)
+	_update_arrow_sizes()
+
+
 func _apply_strategem() -> void:
 	strategem_icon.texture = strat_data["icon"]
 	strategem_name.text = strat_data["name"]
@@ -58,6 +78,7 @@ func _apply_strategem() -> void:
 		arrow_icons.append(arrow)
 
 	strategem_codes.visible = show_sequence
+	_update_arrow_sizes()
 	if preview_mode:
 		show_preview_sequence()
 	else:
@@ -134,3 +155,11 @@ func _clear_codes() -> void:
 	arrow_icons.clear()
 	for child in strategem_codes.get_children():
 		child.queue_free()
+
+
+func _update_arrow_sizes() -> void:
+	var arrow_size := 70.0
+	if compact_mode:
+		arrow_size = 34.0 if arrow_icons.size() <= 8 else 26.0
+	for arrow in arrow_icons:
+		arrow.custom_minimum_size = Vector2(arrow_size, arrow_size)

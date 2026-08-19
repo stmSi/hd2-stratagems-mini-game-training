@@ -33,6 +33,8 @@ const GLOBAL_DATA = preload("res://Src/Global.gd")
 @onready var controller_left_btn: Button = %ControllerLeftBtn
 @onready var controller_down_btn: Button = %ControllerDownBtn
 @onready var controller_right_btn: Button = %ControllerRightBtn
+@onready var panel_container: PanelContainer = %PanelContainer
+@onready var panel_margin: MarginContainer = %MarginContainer
 
 var randomize_mode := false
 var audio_volume := GLOBAL_DATA.DEFAULT_AUDIO_VOLUME
@@ -79,6 +81,8 @@ func _ready() -> void:
 	settings_tabs.set_tab_title(settings_tabs.get_tab_idx_from_control(general_tab), "General")
 	settings_tabs.set_tab_title(settings_tabs.get_tab_idx_from_control(keyboard_tab), "Keyboard")
 	settings_tabs.set_tab_title(settings_tabs.get_tab_idx_from_control(controller_tab), "Controller")
+	_apply_responsive_layout()
+	get_viewport().size_changed.connect(_apply_responsive_layout)
 	_sync_controls_from_state()
 
 
@@ -140,6 +144,7 @@ func _input(event: InputEvent) -> void:
 func open_with_config(config: Dictionary) -> void:
 	_apply_config(config)
 	_cancel_binding_capture(false)
+	_apply_responsive_layout()
 	settings_tabs.current_tab = 0
 	visible = true
 	close_btn.grab_focus()
@@ -414,3 +419,14 @@ func _on_web_hold_warning_meta_clicked(meta: Variant) -> void:
 	var err := OS.shell_open(GLOBAL_DATA.GITHUB_RELEASES_URL)
 	if err != OK:
 		push_warning("Failed to open GitHub releases link: %s" % err)
+
+
+func _apply_responsive_layout() -> void:
+	var viewport_size := get_viewport().get_visible_rect().size
+	var compact := viewport_size.x < 720.0
+	panel_container.custom_minimum_size = Vector2(maxf(300.0, viewport_size.x - 20.0), 0) if compact else Vector2(980, 0)
+	var panel_gutter := 12 if compact else 30
+	for side in ["margin_left", "margin_top", "margin_right", "margin_bottom"]:
+		panel_margin.add_theme_constant_override(side, panel_gutter)
+	settings_tabs.custom_minimum_size = Vector2(0, minf(640.0, viewport_size.y - 126.0)) if compact else Vector2(0, 560)
+	close_btn.custom_minimum_size = Vector2(84, 44) if compact else Vector2(112, 44)

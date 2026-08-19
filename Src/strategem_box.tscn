@@ -4,7 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://dg1pmwfpwxg8d" path="res://Assets/icons/Autocannon Sentry Stratagem Icon.svg" id="2_53hlh"]
 [ext_resource type="PackedScene" uid="uid://bs2ww5vda85fw" path="res://Src/arrow_code_icon.tscn" id="3_1odh4"]
 
-[node name="Strategem" type="HBoxContainer" unique_id=1231085371]
+[node name="Strategem" type="BoxContainer" unique_id=1231085371]
 theme_override_constants/separation = 20
 script = ExtResource("1_nlmhf")
 
@@ -22,37 +22,38 @@ size_flags_vertical = 4
 texture = ExtResource("2_53hlh")
 expand_mode = 1
 
-[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1255415003]
+[node name="Details" type="VBoxContainer" parent="." unique_id=1255415003]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 4
 
-[node name="StrategemName" type="Label" parent="VBoxContainer" unique_id=792118642]
+[node name="StrategemName" type="Label" parent="Details" unique_id=792118642]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 48
 text = "Autocannon"
 
-[node name="StrategemCodes" type="HBoxContainer" parent="VBoxContainer" unique_id=1226784705]
+[node name="StrategemCodes" type="HFlowContainer" parent="Details" unique_id=1226784705]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 20
 
-[node name="ArrowCodeIcon" parent="VBoxContainer/StrategemCodes" unique_id=122008588 instance=ExtResource("3_1odh4")]
+[node name="ArrowCodeIcon" parent="Details/StrategemCodes" unique_id=122008588 instance=ExtResource("3_1odh4")]
 layout_mode = 2
 
-[node name="ArrowCodeIcon2" parent="VBoxContainer/StrategemCodes" unique_id=1674434589 instance=ExtResource("3_1odh4")]
+[node name="ArrowCodeIcon2" parent="Details/StrategemCodes" unique_id=1674434589 instance=ExtResource("3_1odh4")]
 layout_mode = 2
 current_arrow = 1
 
-[node name="ArrowCodeIcon3" parent="VBoxContainer/StrategemCodes" unique_id=1789813221 instance=ExtResource("3_1odh4")]
+[node name="ArrowCodeIcon3" parent="Details/StrategemCodes" unique_id=1789813221 instance=ExtResource("3_1odh4")]
 layout_mode = 2
 current_arrow = 2
 
-[node name="ArrowCodeIcon4" parent="VBoxContainer/StrategemCodes" unique_id=1647253947 instance=ExtResource("3_1odh4")]
+[node name="ArrowCodeIcon4" parent="Details/StrategemCodes" unique_id=1647253947 instance=ExtResource("3_1odh4")]
 layout_mode = 2
 current_arrow = 3
 
-[node name="ArrowCodeIcon5" parent="VBoxContainer/StrategemCodes" unique_id=592057797 instance=ExtResource("3_1odh4")]
+[node name="ArrowCodeIcon5" parent="Details/StrategemCodes" unique_id=592057797 instance=ExtResource("3_1odh4")]
 layout_mode = 2
 current_arrow = 1

@@ -22,6 +22,17 @@ const SUCCESS_SFX_BASE_DB := -3.0
 @onready var correct_sfx: AudioStreamPlayer = %CorrectSfx
 @onready var fail_sfx: AudioStreamPlayer = %FailSfx
 @onready var success_sfx: AudioStreamPlayer = %SuccessSfx
+@onready var page_margin: MarginContainer = %MarginContainer
+@onready var root_layout: VBoxContainer = %VBoxContainer
+@onready var header: HBoxContainer = %Header
+@onready var body: VBoxContainer = %Body
+@onready var title_label: Label = %TitleLabel
+@onready var touch_controls: PanelContainer = %TouchControls
+@onready var touch_hold_btn: Button = %TouchHoldBtn
+@onready var touch_up_btn: Button = %TouchUpBtn
+@onready var touch_left_btn: Button = %TouchLeftBtn
+@onready var touch_down_btn: Button = %TouchDownBtn
+@onready var touch_right_btn: Button = %TouchRightBtn
 
 var settings_popup: Control
 var selected_strat_ids: Array[String] = []
@@ -45,6 +56,9 @@ var hold_feedback_active := false
 var hold_state_base_scale := Vector2.ONE
 var attempt_started_at_msec := 0
 var rng := RandomNumberGenerator.new()
+var compact_mode := false
+var touch_layout := false
+var touch_hold_active := false
 
 
 func _ready() -> void:
@@ -57,6 +71,9 @@ func _ready() -> void:
 	settings_btn.pressed.connect(_on_settings_pressed)
 	_load_config()
 	_setup_settings_popup()
+	_setup_touch_controls()
+	_apply_responsive_layout(true)
+	get_viewport().size_changed.connect(_on_viewport_size_changed)
 	_configure_audio_players()
 	_update_mode_label()
 	_apply_show_arrows_setting()
@@ -66,6 +83,7 @@ func _ready() -> void:
 	if trainable_strat_ids.is_empty():
 		strategem_box.visible = false
 		next_up_panel.visible = false
+		touch_controls.visible = false
 		hold_state_label.visible = false
 		stats_panel.visible = false
 		status_label.text = "No trainable stratagems selected."
@@ -74,7 +92,7 @@ func _ready() -> void:
 
 	strategem_box.visible = true
 	next_up_panel.visible = true
-	stats_panel.visible = true
+	stats_panel.visible = not touch_layout
 	_prime_training_rotation()
 
 
@@ -131,6 +149,30 @@ func _setup_settings_popup() -> void:
 	settings_popup.config_changed.connect(_on_settings_popup_config_changed)
 
 
+func _setup_touch_controls() -> void:
+	touch_up_btn.pressed.connect(_on_touch_direction_pressed.bind(GLOBAL_DATA.ARROW.UP))
+	touch_left_btn.pressed.connect(_on_touch_direction_pressed.bind(GLOBAL_DATA.ARROW.LEFT))
+	touch_down_btn.pressed.connect(_on_touch_direction_pressed.bind(GLOBAL_DATA.ARROW.DOWN))
+	touch_right_btn.pressed.connect(_on_touch_direction_pressed.bind(GLOBAL_DATA.ARROW.RIGHT))
+	touch_hold_btn.button_down.connect(_on_touch_hold_changed.bind(true))
+	touch_hold_btn.button_up.connect(_on_touch_hold_changed.bind(false))
+
+
+func _on_touch_direction_pressed(input_arrow: int) -> void:
+	if settings_popup and settings_popup.visible:
+		return
+	if input_locked or current_sequence.is_empty():
+		return
+	if require_holding and not touch_hold_active:
+		return
+	_handle_input_arrow(input_arrow)
+
+
+func _on_touch_hold_changed(active: bool) -> void:
+	touch_hold_active = active
+	_refresh_hold_feedback(true)
+
+
 func _build_settings_config() -> Dictionary:
 	return {
 		"randomize_mode": randomize_mode,
@@ -171,6 +213,7 @@ func _apply_settings_config(config: Dictionary) -> void:
 	_configure_audio_players()
 	_update_mode_label()
 	_apply_show_arrows_setting()
+	_update_touch_hold_control()
 	_update_controls_hint()
 	_refresh_hold_feedback(true)
 	if previous_randomize_mode != randomize_mode:
@@ -336,6 +379,8 @@ func _on_github_link_pressed() -> void:
 func _on_settings_pressed() -> void:
 	if not settings_popup:
 		return
+	touch_hold_active = false
+	_refresh_hold_feedback(true)
 	settings_popup.open_with_config(_build_settings_config())
 
 
@@ -368,6 +413,13 @@ func _apply_show_arrows_setting() -> void:
 
 
 func _update_controls_hint() -> void:
+	if touch_layout:
+		if require_holding:
+			hint_label.text = "Hold INPUT with one finger, then tap the direction arrows."
+		else:
+			hint_label.text = "Tap the direction arrows to enter the sequence."
+		return
+
 	var hint_text := "Keyboard: %s  |  Controller: %s" % [
 		GLOBAL_DATA.get_direction_binding_summary(direction_bindings),
 		GLOBAL_DATA.get_controller_direction_binding_summary(controller_direction_bindings),
@@ -388,7 +440,7 @@ func _refresh_hold_feedback(force := false) -> void:
 			hold_state_label.self_modulate = Color.WHITE
 		return
 
-	var next_active := GLOBAL_DATA.is_hold_input_active(hold_binding, controller_hold_binding)
+	var next_active := touch_hold_active or GLOBAL_DATA.is_hold_input_active(hold_binding, controller_hold_binding)
 	if not force and next_active == hold_feedback_active:
 		return
 
@@ -401,7 +453,10 @@ func _refresh_hold_feedback(force := false) -> void:
 		if not force:
 			_pulse_hold_feedback()
 	else:
-		hold_state_label.text = "Hold %s to input" % GLOBAL_DATA.get_hold_binding_summary(hold_binding, controller_hold_binding)
+		if touch_layout:
+			hold_state_label.text = "Hold the gold INPUT button to enter directions"
+		else:
+			hold_state_label.text = "Hold %s to input" % GLOBAL_DATA.get_hold_binding_summary(hold_binding, controller_hold_binding)
 		hold_state_label.self_modulate = Color(1.0, 0.88, 0.62, 0.92)
 
 
@@ -434,6 +489,9 @@ func _save_user_config() -> void:
 
 
 func _refresh_next_preview() -> void:
+	if touch_layout:
+		next_up_panel.visible = false
+		return
 	if next_strat_id.is_empty() or not GLOBAL_DATA.has_stratagem(next_strat_id):
 		next_up_panel.visible = false
 		return
@@ -561,3 +619,48 @@ func _format_count(value: int, singular: String, plural: String) -> String:
 	if value == 1:
 		return "1 %s" % singular
 	return "%d %s" % [value, plural]
+
+
+func _on_viewport_size_changed() -> void:
+	_apply_responsive_layout()
+
+
+func _apply_responsive_layout(force := false) -> void:
+	var viewport_width := get_viewport().get_visible_rect().size.x
+	var next_compact_mode := viewport_width < 720.0
+	var next_touch_layout := next_compact_mode or DisplayServer.is_touchscreen_available()
+	if not force and next_compact_mode == compact_mode and next_touch_layout == touch_layout:
+		return
+
+	compact_mode = next_compact_mode
+	touch_layout = next_touch_layout
+	var page_gutter := 10 if compact_mode else 24
+	for side in ["margin_left", "margin_top", "margin_right", "margin_bottom"]:
+		page_margin.add_theme_constant_override(side, page_gutter)
+	root_layout.add_theme_constant_override("separation", 10 if compact_mode else 24)
+	header.add_theme_constant_override("separation", 6 if compact_mode else 0)
+	body.add_theme_constant_override("separation", 10 if touch_layout else 20)
+	body.custom_minimum_size = Vector2(0, 0)
+	title_label.add_theme_font_size_override("font_size", 30 if compact_mode else 42)
+	hint_label.add_theme_font_size_override("font_size", 15 if compact_mode else 20)
+	hint_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	hint_label.custom_minimum_size = Vector2(340, 0) if compact_mode else Vector2(0, 0)
+	status_label.add_theme_font_size_override("font_size", 19 if compact_mode else 24)
+	back_btn.custom_minimum_size = Vector2(82, 48) if compact_mode else Vector2(120, 48)
+	settings_btn.custom_minimum_size = Vector2(104, 48) if compact_mode else Vector2(124, 44)
+	github_link_btn.visible = not compact_mode
+	mode_label.visible = not compact_mode
+	touch_controls.visible = touch_layout and not trainable_strat_ids.is_empty()
+	next_up_panel.custom_minimum_size = Vector2(0, 0) if compact_mode else Vector2(860, 0)
+	stats_panel.custom_minimum_size = Vector2(0, 0) if compact_mode else Vector2(860, 200)
+	stats_panel.visible = not touch_layout and not trainable_strat_ids.is_empty()
+	strategem_box.set_compact_mode(compact_mode)
+	_update_touch_hold_control()
+	_update_controls_hint()
+	_refresh_next_preview()
+
+
+func _update_touch_hold_control() -> void:
+	touch_hold_btn.visible = touch_layout and require_holding
+	if not require_holding:
+		touch_hold_active = false

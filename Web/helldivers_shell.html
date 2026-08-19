@@ -2,11 +2,15 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 	<title>Helldivers 2 Stratagem Training Mini Game</title>
 	<meta name="description" content="Practice Helldivers 2 stratagem input sequences in your browser. Build a practice queue, hide arrow prompts, remap controls, and train orbital, eagle, support, defensive, and mission stratagems.">
 	<meta name="robots" content="index, follow, max-image-preview:large">
 	<meta name="theme-color" content="#08111a">
+	<meta name="mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+	<meta name="apple-mobile-web-app-title" content="Stratagem Trainer">
 	<meta name="author" content="stmSi">
 	<link rel="canonical" href="https://stmsi.github.io/hd2-stratagems-mini-game-training/">
 	<meta property="og:type" content="website">
@@ -70,6 +74,7 @@
 
 		html, body {
 			overflow: hidden;
+			overscroll-behavior: none;
 			background: var(--ink);
 			color: var(--text);
 			font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
@@ -78,6 +83,8 @@
 
 		body {
 			position: relative;
+			-webkit-tap-highlight-color: transparent;
+			-webkit-touch-callout: none;
 		}
 
 		#canvas {

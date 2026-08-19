@@ -183,7 +183,8 @@ offset_bottom = 158.0
 mouse_filter = 2
 color = Color(1, 1, 1, 0.08)
 
-[node name="VBoxContainer" type="MarginContainer" parent="." unique_id=2158051]
+[node name="PageMargin" type="MarginContainer" parent="." unique_id=2158051]
+unique_name_in_owner = true
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -194,17 +195,19 @@ theme_override_constants/margin_top = 20
 theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 20
 
-[node name="RootLayout" type="VBoxContainer" parent="VBoxContainer" unique_id=129550880]
+[node name="RootLayout" type="VBoxContainer" parent="PageMargin" unique_id=129550880]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 18
 
-[node name="SearchRow" type="HBoxContainer" parent="VBoxContainer/RootLayout" unique_id=1280122282]
+[node name="SearchRow" type="HBoxContainer" parent="PageMargin/RootLayout" unique_id=1280122282]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="SearchInput" type="LineEdit" parent="VBoxContainer/RootLayout/SearchRow" unique_id=2027541383]
+[node name="SearchInput" type="LineEdit" parent="PageMargin/RootLayout/SearchRow" unique_id=2027541383]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
@@ -214,20 +217,20 @@ theme_override_styles/normal = SubResource("StyleBoxFlat_6q3u3")
 theme_override_styles/focus = SubResource("StyleBoxFlat_hc3w7")
 placeholder_text = "Search stratagems"
 
-[node name="SearchClearBtn" type="Button" parent="VBoxContainer/RootLayout/SearchRow" unique_id=1636528283]
+[node name="SearchClearBtn" type="Button" parent="PageMargin/RootLayout/SearchRow" unique_id=1636528283]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(100, 42)
 layout_mode = 2
 text = "Clear"
 
-[node name="CustomStratagemsBtn" type="Button" parent="VBoxContainer/RootLayout/SearchRow"]
+[node name="CustomStratagemsBtn" type="Button" parent="PageMargin/RootLayout/SearchRow"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(190, 42)
 layout_mode = 2
 theme_override_font_sizes/font_size = 17
 text = "+ Custom Stratagem"
 
-[node name="GithubLinkBtn" type="LinkButton" parent="VBoxContainer/RootLayout/SearchRow" unique_id=1823757746]
+[node name="GithubLinkBtn" type="LinkButton" parent="PageMargin/RootLayout/SearchRow" unique_id=1823757746]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(84, 42)
 layout_mode = 2
@@ -235,17 +238,20 @@ theme_override_font_sizes/font_size = 17
 text = "GitHub"
 underline = 1
 
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/RootLayout" unique_id=2126227026]
+[node name="ContentSplit" type="BoxContainer" parent="PageMargin/RootLayout" unique_id=2126227026]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="ListOfStratsScroll" type="ScrollContainer" parent="VBoxContainer/RootLayout/HBoxContainer" unique_id=799264786]
+[node name="ListOfStratsScroll" type="ScrollContainer" parent="PageMargin/RootLayout/ContentSplit" unique_id=799264786]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
 
-[node name="ListOfStratsPadding" type="MarginContainer" parent="VBoxContainer/RootLayout/HBoxContainer/ListOfStratsScroll"]
+[node name="ListOfStratsPadding" type="MarginContainer" parent="PageMargin/RootLayout/ContentSplit/ListOfStratsScroll"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/margin_left = 30
@@ -253,55 +259,57 @@ theme_override_constants/margin_top = 18
 theme_override_constants/margin_right = 22
 theme_override_constants/margin_bottom = 18
 
-[node name="ListOfStrats" type="VBoxContainer" parent="VBoxContainer/RootLayout/HBoxContainer/ListOfStratsScroll/ListOfStratsPadding" unique_id=2020804752]
+[node name="ListOfStrats" type="VBoxContainer" parent="PageMargin/RootLayout/ContentSplit/ListOfStratsScroll/ListOfStratsPadding" unique_id=2020804752]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 18
 
-[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/RootLayout/HBoxContainer" unique_id=770523182]
+[node name="QueuePanel" type="VBoxContainer" parent="PageMargin/RootLayout/ContentSplit" unique_id=770523182]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(420, 0)
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_constants/separation = 12
 
-[node name="PracticeListLabel" type="Label" parent="VBoxContainer/RootLayout/HBoxContainer/VBoxContainer" unique_id=1993433562]
+[node name="PracticeListLabel" type="Label" parent="PageMargin/RootLayout/ContentSplit/QueuePanel" unique_id=1993433562]
 layout_mode = 2
 theme_override_font_sizes/font_size = 28
 text = "Practice Queue"
 
-[node name="PlayerStratsScroll" type="ScrollContainer" parent="VBoxContainer/RootLayout/HBoxContainer/VBoxContainer" unique_id=1914780593]
+[node name="PlayerStratsScroll" type="ScrollContainer" parent="PageMargin/RootLayout/ContentSplit/QueuePanel" unique_id=1914780593]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
 
-[node name="PlayerStrats" type="VBoxContainer" parent="VBoxContainer/RootLayout/HBoxContainer/VBoxContainer/PlayerStratsScroll" unique_id=1115432581]
+[node name="PlayerStrats" type="VBoxContainer" parent="PageMargin/RootLayout/ContentSplit/QueuePanel/PlayerStratsScroll" unique_id=1115432581]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 10
 
-[node name="SettingsToggleBtn" type="Button" parent="VBoxContainer/RootLayout/HBoxContainer/VBoxContainer" unique_id=595208425]
+[node name="SettingsToggleBtn" type="Button" parent="PageMargin/RootLayout/ContentSplit/QueuePanel" unique_id=595208425]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 text = "Settings"
 
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/RootLayout/HBoxContainer/VBoxContainer" unique_id=434436020]
+[node name="ActionRow" type="HBoxContainer" parent="PageMargin/RootLayout/ContentSplit/QueuePanel" unique_id=434436020]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 50
 alignment = 1
 
-[node name="ClearResetBtn" type="Button" parent="VBoxContainer/RootLayout/HBoxContainer/VBoxContainer/HBoxContainer" unique_id=1432907281]
+[node name="ClearResetBtn" type="Button" parent="PageMargin/RootLayout/ContentSplit/QueuePanel/ActionRow" unique_id=1432907281]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(140, 60)
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "Clear List"
 
-[node name="TrainBtn" type="Button" parent="VBoxContainer/RootLayout/HBoxContainer/VBoxContainer/HBoxContainer" unique_id=67925908]
+[node name="TrainBtn" type="Button" parent="PageMargin/RootLayout/ContentSplit/QueuePanel/ActionRow" unique_id=67925908]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(184, 64)
 layout_mode = 2
